@@ -40,17 +40,17 @@ class ui_testing(object):
                             # os.system("composite %s %s -compose difference x:" % (baseline_file, test_file))
 
                             os.system("composite %s %s -compose difference %s" % (baselines[i], newfiles[i], difference_file))
-                            print "difference file %s successfully saved" % os.path.basename((difference_file))
+                            print "[SUCCESS] %s saved" % os.path.basename((difference_file))
 
                             os.system("convert -delay 100 %s %s -loop 0 %s" % (baselines[i], newfiles[i], difference_file.replace('.png', '.gif')))
-                            print ".gif difference file %s successfully saved" % os.path.basename(difference_file)
+                            print "[SUCCESS] %s saved." % os.path.basename(difference_file)
 
                         else:
-                            print "Files do not match, trying to compare %s and %s" % (baselines[i], newfiles[i])  
+                            print "[ERROR] files do not match, trying to compare %s and %s." % (baselines[i], newfiles[i])  
                 except IOError:
-                    print "File or folder not found"
+                    print "[ERROR] file or folder not found."
             else:
-                print 'Error, differing amount of files in %s & %s directories' % (self.baseline_location, self.new_location)
+                print '[ERROR] differing number of files in %s & %s directories.' % (self.baseline_location, self.new_location)
 
         # description is anything that can be used to uniquely identify what is
         # being tested. (this can be an element id, name of the html file, etc.)
@@ -72,34 +72,34 @@ class ui_testing(object):
                     inp = str(raw_input(os.path.basename(self.file_path) + " already exists, overwrite? (y/n): "))
                     if inp.lower() == "y":                      
                         if self.driver.get_screenshot_as_file(self.file_path):
-                            print "%s successfully saved" % os.path.basename(self.file_path) 
+                            print "[SUCCESS] %s saved." % os.path.basename(self.file_path) 
                             if element_specifier:
                                 if method in methods:
                                     if self.cropElement(element_specifier, method):
-                                        print "%s successfully cropped and saved as %s" % (element_specifier, os.path.basename(self.file_path))
+                                        print "[SUCCESS] %s cropped." % (os.path.basename(self.file_path))
                                     else:
-                                        print "error cropping %s" % element_specifier
+                                        print "[ERROR] cropping %s failed." % element_specifier
                                 else:
-                                    msg = "invalid parameters, please make sure an element specifier AND a method are being passed, see valid methods: \n" + str(methods)
+                                    msg = "[ERROR] invalid parameters, please make sure an element specifier AND a method are being passed, see valid methods: \n" + str(methods)
                                     self.driver.quit()
                                     raise Exception(msg)
                         else:
-                            print "error saving %s" % os.path.basename(self.file_path)
+                            print "[ERROR] saving %s failed." % os.path.basename(self.file_path)
                 else:                   
                     if self.driver.get_screenshot_as_file(self.file_path):
-                        print "%s successfully saved" % os.path.basename(self.file_path) 
+                        print "[SUCCESS] %s saved." % os.path.basename(self.file_path) 
                         if element_specifier:                      
                             if method in methods:
                                 if self.cropElement(element_specifier, method):
-                                    print "%s successfully cropped and saved as %s" % (element_specifier, os.path.basename(self.file_path))
+                                    print "[SUCCESS] %s cropped." % (os.path.basename(self.file_path))
                                 else:
-                                    print "error cropping %s" % element_specifier
+                                    print "[ERROR] cropping %s failed." % element_specifier
                             else:
-                                msg = "invalid parameters, please make sure an element specifier AND a method are being passed, see valid methods: \n" + str(methods)
+                                msg = "[ERROR] invalid parameters, please make sure an element specifier AND a method are being passed, see valid methods: \n" + str(methods)
                                 self.driver.quit()
                                 raise Exception(msg)
                     else:
-                        print "error saving %s" % os.path.basename(self.file_path)
+                        print "[ERROR] saving %s failed." % os.path.basename(self.file_path)
                 
             else:
                 print "Generating new image..."
@@ -110,37 +110,37 @@ class ui_testing(object):
                     inp = str(raw_input(os.path.basename(self.file_path) + " already exists, overwrite? (y/n): "))
                     if inp.lower() == 'y':                       
                         if self.driver.get_screenshot_as_file(self.file_path):
-                            print "%s successfully saved" % os.path.basename(self.file_path)
+                            print "[SUCCESS] %s saved." % os.path.basename(self.file_path)
                             if element_specifier:
                                 if method in methods:                                  
                                     if self.cropElement(element_specifier, method):
-                                        print "%s successfully cropped and saved as %s" % (element_specifier, os.path.basename(self.file_path))
+                                        print "[SUCCESS] %s cropped." % (os.path.basename(self.file_path))
                                     else:
-                                        print "error cropping %s" % element_specifier
+                                        print "[ERROR] cropping %s failed." % element_specifier
                                 else:
-                                    msg = "invalid parameters, please make sure an element specifier AND a method are being passed, see valid methods: \n" + str(methods)
+                                    msg = "[ERROR] invalid parameters, please make sure an element specifier AND a method are being passed, see valid methods: \n" + str(methods)
                                     self.driver.quit()
                                     raise Exception(msg)
                         else:
-                            print "error saving %s" % os.path.basename(self.file_path)
+                            print "[ERROR] saving %s failed." % os.path.basename(self.file_path)
                 else:
                     if self.driver.get_screenshot_as_file(self.file_path):
-                        print "%s successfully saved" % os.path.basename(self.file_path) 
+                        print "[SUCCESS] %s saved." % os.path.basename(self.file_path) 
                         if element_specifier:
                             if method in methods:                            
                                 if self.cropElement(element_specifier, method):
-                                    print "%s successfully cropped and saved as %s" % (element_specifier, os.path.basename(self.file_path))
+                                    print "[SUCCESS] %s cropped." % (os.path.basename(self.file_path))
                                 else:
-                                   print "error cropping %s" % element_specifier
+                                   print "[ERROR] cropping %s failed." % element_specifier
                             else:
-                                msg = "invalid parameters, please make sure an element specifier AND a method are being passed, see valid methods: \n" + str(methods)
+                                msg = "[ERROR] invalid parameters, please make sure an element specifier AND a method are being passed, see valid methods: \n" + str(methods)
                                 self.driver.quit()
                                 raise Exception(msg)
                     else:
-                        print "error saving %s" % os.path.basename(self.file_path)
+                        print "[ERROR] saving %s failed." % os.path.basename(self.file_path)
                 
         else:
-            print "Please specify a description"
+            print "[ERROR] You need to specify a description."
 
 
     def cropElement(self, element_specifier, method):
@@ -181,7 +181,7 @@ class ui_testing(object):
             im.save(self.file_path)
             return True
         except NoSuchElementException:
-            print "Element with the id %s doesn't exist" % (element_specifier)
+            print "[ERROR] element with the %s,  %s doesn't exist, or cannot be located." % (method, element_specifier)
             return False
 
     def setUpDirectories(self):
