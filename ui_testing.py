@@ -18,6 +18,8 @@ class ui_testing(object):
         self.is_baseline = args['baseline']
         self.browser = args['browser']
         self.driver = driver
+        
+        self.setUpDirectories()
 
     def compareScreenshots(self):
 
