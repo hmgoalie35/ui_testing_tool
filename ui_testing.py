@@ -188,8 +188,8 @@ class ui_testing(object):
 
     def setUpDirectories(self):
         caller_location = os.path.abspath(inspect.stack()[2][1])
-        
-        self.current_directory = os.path.abspath(os.path.dirname(os.path.abspath(caller_location)))
+
+        self.current_directory = os.path.abspath(os.path.dirname(caller_location))
         self.ui_testing_folder = os.path.abspath(os.path.join(self.current_directory, 'ui_testing/'))
 
         self.browser_folder = os.path.abspath(os.path.join(self.ui_testing_folder, self.browser))
