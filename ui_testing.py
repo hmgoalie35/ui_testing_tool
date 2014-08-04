@@ -6,8 +6,7 @@ import argparse
 
 parser = argparse.ArgumentParser(prog=__file__,formatter_class=argparse.ArgumentDefaultsHelpFormatter, description="Run a selenium script and take screenshots of ui elements, to see if your code changes broke anything")
 parser.add_argument('--baseline', action='store_true', help="Generate the baseline images.")
-# parser.add_argument('--baseline', action='store', choices=[True, False], required=True, help="Generate the baseline images or not.")
-# parser.add_argument('--browser', action='store', type=str, choices=['chrome', 'firefox', 'ie', 'safari'], required=True, help="The browser to run the test on.")
+parser.add_argument('--browser', action='store', type=str, choices=['chrome', 'firefox', 'ie', 'safari'], required=True, help="The browser to run the test on.")
 args = vars(parser.parse_args())
 
 methods = ['id', 'name', 'xpath','link_text', 'partial_link_text', 'tag_name', 'class_name', 'css_selector']
@@ -17,7 +16,7 @@ class ui_testing(object):
     def __init__(self, driver):
         self.file_path = None
         self.is_baseline = args['baseline']
-        # self.browser = args['browser']
+        self.browser = args['browser']
         self.driver = driver
 
     def compareScreenshots(self):
@@ -185,15 +184,23 @@ class ui_testing(object):
             return False
 
     def setUpDirectories(self):
-        # current directory where file is being executed -- need to change this so folders are created local to the computer, or just add folders to .gitignore 
         self.current_directory = os.path.abspath(os.path.dirname(os.path.abspath(__file__)))
         self.ui_testing_folder = os.path.abspath(os.path.join(self.current_directory, 'ui_testing/'))
-        self.baseline_location = os.path.abspath(os.path.join(self.ui_testing_folder, 'baseline/'))
-        self.new_location = os.path.abspath(os.path.join(self.ui_testing_folder, 'new/'))
-        self.diff_location = os.path.abspath(os.path.join(self.ui_testing_folder, 'diff/'))
+
+        self.browser_folder = os.path.abspath(os.path.join(self.ui_testing_folder, self.browser))
+
+        self.baseline_location = os.path.abspath(os.path.join(self.browser_folder, 'baseline/'))
+        self.new_location = os.path.abspath(os.path.join(self.browser_folder, 'new/'))
+        self.diff_location = os.path.abspath(os.path.join(self.browser_folder, 'diff/'))
+
+        if self.driver.name != self.browser:
+            self.driver.quit()
+            raise Exception("The %s driver being used does not match the %s browser specified on the command line." % (self.driver.name, self.browser))
 
         if not os.path.exists(self.ui_testing_folder):
             os.mkdir(self.ui_testing_folder)
+        if not os.path.exists(self.browser_folder):
+            os.mkdir(self.browser_folder)
         if not os.path.exists(self.baseline_location):
             os.mkdir(self.baseline_location)
         if not os.path.exists(self.new_location):
