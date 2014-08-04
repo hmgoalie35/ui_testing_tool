@@ -3,6 +3,7 @@ from PIL import Image
 import platform
 import os, sys
 import argparse
+import inspect
 
 parser = argparse.ArgumentParser(prog=__file__,formatter_class=argparse.ArgumentDefaultsHelpFormatter, description="Run a selenium script and take screenshots of ui elements, to see if your code changes broke anything")
 parser.add_argument('--baseline', action='store_true', help="Generate the baseline images.")
@@ -18,7 +19,7 @@ class ui_testing(object):
         self.is_baseline = args['baseline']
         self.browser = args['browser']
         self.driver = driver
-        
+
         self.setUpDirectories()
 
     def compareScreenshots(self):
@@ -168,8 +169,8 @@ class ui_testing(object):
                 element = self.driver.find_element_by_css_selector(element_specifier)
             else:
                 # unknown method
-                raise Exception("Invalid Method Specified")
                 self.driver.quit()
+                raise Exception("Invalid Method Specified")
                 return False
             location = element.location
             size = element.size
@@ -186,7 +187,9 @@ class ui_testing(object):
             return False
 
     def setUpDirectories(self):
-        self.current_directory = os.path.abspath(os.path.dirname(os.path.abspath(__file__)))
+        caller_location = os.path.abspath(inspect.stack()[2][1])
+        
+        self.current_directory = os.path.abspath(os.path.dirname(os.path.abspath(caller_location)))
         self.ui_testing_folder = os.path.abspath(os.path.join(self.current_directory, 'ui_testing/'))
 
         self.browser_folder = os.path.abspath(os.path.join(self.ui_testing_folder, self.browser))
