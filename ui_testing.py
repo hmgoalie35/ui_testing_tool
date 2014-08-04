@@ -5,7 +5,7 @@ import os, sys
 import argparse
 import inspect
 
-parser = argparse.ArgumentParser(prog=__file__,formatter_class=argparse.ArgumentDefaultsHelpFormatter, description="Run a selenium script and take screenshots of ui elements, to see if your code changes broke anything")
+parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter, description="Run a selenium script and take screenshots of ui elements, to see if your code changes broke anything")
 parser.add_argument('--baseline', action='store_true', help="Generate the baseline images.")
 parser.add_argument('--browser', action='store', type=str, choices=['chrome', 'firefox', 'ie', 'safari'], required=True, help="The browser to run the test on.")
 args = vars(parser.parse_args())
@@ -24,8 +24,6 @@ class ui_testing(object):
 
     def compareScreenshots(self):
 
-        # TODO prevent overwriting of files
-
         if not self.is_baseline:          
             baselines = sorted(os.listdir(self.baseline_location))
             newfiles = sorted(os.listdir(self.new_location))
@@ -35,17 +33,27 @@ class ui_testing(object):
                     for i in range(len(baselines)):
                         if ((baselines[i].split('_baseline')[0] + '.png') == newfiles[i]):
                             difference_file = os.path.abspath(os.path.join(self.diff_location, newfiles[i].replace('.png', '_diff.png')))
+                            difference_file_gif = difference_file.replace('.png', '.gif')
 
                             baselines[i] = os.path.abspath(os.path.join(self.baseline_location, baselines[i]))
                             newfiles[i] = os.path.abspath(os.path.join(self.new_location, newfiles[i]))
 
-                            # os.system("composite %s %s -compose difference x:" % (baseline_file, test_file))
+                            if os.path.exists(difference_file) or os.path.exists(difference_file_gif):
+                                inp = str(raw_input(os.path.basename(difference_file) + " and " + os.path.basename(difference_file_gif) +  " already exist, overwrite BOTH? (y/n): "))
+                                if inp.lower() == "y":    
+                                    # os.system("composite %s %s -compose difference x:" % (baseline_file, test_file))                                
+                                    os.system("composite %s %s -compose difference %s" % (baselines[i], newfiles[i], difference_file))
+                                    print "[SUCCESS] %s overwritten." % os.path.basename((difference_file))
 
-                            os.system("composite %s %s -compose difference %s" % (baselines[i], newfiles[i], difference_file))
-                            print "[SUCCESS] %s saved" % os.path.basename((difference_file))
+                                    os.system("convert -delay 100 %s %s -loop 0 %s" % (baselines[i], newfiles[i], difference_file_gif))
+                                    print "[SUCCESS] %s overwritten." % os.path.basename(difference_file_gif)
+                            else:
+                                # os.system("composite %s %s -compose difference x:" % (baseline_file, test_file))
+                                os.system("composite %s %s -compose difference %s" % (baselines[i], newfiles[i], difference_file))
+                                print "[SUCCESS] %s saved." % os.path.basename((difference_file))
 
-                            os.system("convert -delay 100 %s %s -loop 0 %s" % (baselines[i], newfiles[i], difference_file.replace('.png', '.gif')))
-                            print "[SUCCESS] %s saved." % os.path.basename(difference_file)
+                                os.system("convert -delay 100 %s %s -loop 0 %s" % (baselines[i], newfiles[i], difference_file.replace('.png', '.gif')))
+                                print "[SUCCESS] %s saved." % os.path.basename(difference_file_gif)
 
                         else:
                             print "[ERROR] files do not match, trying to compare %s and %s." % (baselines[i], newfiles[i])  
@@ -74,7 +82,7 @@ class ui_testing(object):
                     inp = str(raw_input(os.path.basename(self.file_path) + " already exists, overwrite? (y/n): "))
                     if inp.lower() == "y":                      
                         if self.driver.get_screenshot_as_file(self.file_path):
-                            print "[SUCCESS] %s saved." % os.path.basename(self.file_path) 
+                            print "[SUCCESS] %s overwritten." % os.path.basename(self.file_path) 
                             if element_specifier:
                                 if method in methods:
                                     if self.cropElement(element_specifier, method):
@@ -112,7 +120,7 @@ class ui_testing(object):
                     inp = str(raw_input(os.path.basename(self.file_path) + " already exists, overwrite? (y/n): "))
                     if inp.lower() == 'y':                       
                         if self.driver.get_screenshot_as_file(self.file_path):
-                            print "[SUCCESS] %s saved." % os.path.basename(self.file_path)
+                            print "[SUCCESS] %s overwritten." % os.path.basename(self.file_path)
                             if element_specifier:
                                 if method in methods:                                  
                                     if self.cropElement(element_specifier, method):
@@ -200,7 +208,7 @@ class ui_testing(object):
 
         if self.driver.name != self.browser:
             self.driver.quit()
-            raise Exception("The %s driver being used does not match the %s browser specified on the command line." % (self.driver.name, self.browser))
+            raise Exception("[ERROR] the %s driver being used does not match the %s browser specified on the command line." % (self.driver.name, self.browser))
 
         if not os.path.exists(self.ui_testing_folder):
             os.mkdir(self.ui_testing_folder)
