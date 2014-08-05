@@ -52,6 +52,7 @@ self.driver.quit()
 ui.compareScreenshots()
 ```
 It is also good practice to quit the driver before comparing the screenshots.
+
 Running the script:
 on the command line
 the first time you run the program you need to generate baseline images. That is what the --baseline flag is for it is an optional flag.
