@@ -9,7 +9,7 @@ Dependencies (Linux):
 ```
 sudo apt-get imagemagick
 [sudo] pip install selenium
-[sudo] pip install PIL
+[sudo] pip install pillow
 ```
 
 For other OS's http://www.imagemagick.org/script/binary-releases.php
