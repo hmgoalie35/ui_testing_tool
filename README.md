@@ -47,7 +47,7 @@ ui.generateFileNameAndTakeScreenshot('test_1')
 say there is an anchor tag on the page
 
 ```
-<a href="http://www.google.com" id='back_btn' style="color:red;"><Press Me</a>
+<a href="http://www.google.com" id='back_btn' style="color:red;">Press Me</a>
 ```
 the below line will take a screenshot and then crop the image to just this anchor tag.
 'id' is passed to tell the function that it should search for the element by id. There are also other possibilities such as xpath, css name, etc. See ui_testing.py for more info.
