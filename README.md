@@ -38,6 +38,7 @@ You can now use all of the functions in the ui_testing module.
 
 ```
 # This will take a screenshot and label the output file with the description 'test_1'
+# file name will be test_1_firefox_linux_baseline.png. this varies depending on OS and browser being used.
 ui.generateFileNameAndTakeScreenshot('test_1')
 # selenium code
 # selenium code
