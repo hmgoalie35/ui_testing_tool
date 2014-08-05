@@ -59,24 +59,25 @@ class ui_testing(object):
                             newfiles[i] = os.path.abspath(os.path.join(self.new_location, newfiles[i]))
 
                             # if the generated diff file or diff gif file already exists prompt the user if they want to overwrite it.
-                            if os.path.exists(difference_file) or os.path.exists(difference_file_gif):
-                                inp = str(raw_input(os.path.basename(difference_file) + " and " + os.path.basename(difference_file_gif) +  " already exist, overwrite BOTH? (y/n): "))
-                                if inp.lower() == "y":    
-                                    # the os.system calls below can be tweaked as desired, further digging into imagemagick's documentation may come up with a better way for comparison
-                                    # os.system("composite %s %s -compose difference x:" % (baseline_file, test_file))                                
-                                    os.system("composite %s %s -compose difference %s" % (baselines[i], newfiles[i], difference_file))
-                                    print "[SUCCESS] %s overwritten." % os.path.basename((difference_file))
+                            # if os.path.exists(difference_file) or os.path.exists(difference_file_gif):
+                            #     inp = str(raw_input(os.path.basename(difference_file) + " and " + os.path.basename(difference_file_gif) +  " already exist, overwrite BOTH? (y/n): "))
+                            #     if inp.lower() == "y":    
+                            #         # the os.system calls below can be tweaked as desired, further digging into imagemagick's documentation may come up with a better way for comparison
+                            #         # os.system("composite %s %s -compose difference x:" % (baseline_file, test_file))                                
+                            #         os.system("composite %s %s -compose difference %s" % (baselines[i], newfiles[i], difference_file))
+                            #         print "[SUCCESS] %s overwritten." % os.path.basename((difference_file))
 
-                                    os.system("convert -delay 100 %s %s -loop 0 %s" % (baselines[i], newfiles[i], difference_file_gif))
-                                    print "[SUCCESS] %s overwritten." % os.path.basename(difference_file_gif)
-                            else:
-                                # the os.system calls below can be tweaked as desired, further digging into imagemagick's documentation may come up with a better way for comparison
-                                # os.system("composite %s %s -compose difference x:" % (baseline_file, test_file))
-                                os.system("composite %s %s -compose difference %s" % (baselines[i], newfiles[i], difference_file))
-                                print "[SUCCESS] %s saved." % os.path.basename((difference_file))
+                            #         os.system("convert -delay 100 %s %s -loop 0 %s" % (baselines[i], newfiles[i], difference_file_gif))
+                            #         print "[SUCCESS] %s overwritten." % os.path.basename(difference_file_gif)
+                            # else:
+                            
+                            # the os.system calls below can be tweaked as desired, further digging into imagemagick's documentation may come up with a better way for comparison
+                            # os.system("composite %s %s -compose difference x:" % (baseline_file, test_file))
+                            os.system("composite %s %s -compose difference %s" % (baselines[i], newfiles[i], difference_file))
+                            print "[SUCCESS] %s saved." % os.path.basename((difference_file))
 
-                                os.system("convert -delay 100 %s %s -loop 0 %s" % (baselines[i], newfiles[i], difference_file.replace('.png', '.gif')))
-                                print "[SUCCESS] %s saved." % os.path.basename(difference_file_gif)
+                            os.system("convert -delay 100 %s %s -loop 0 %s" % (baselines[i], newfiles[i], difference_file.replace('.png', '.gif')))
+                            print "[SUCCESS] %s saved." % os.path.basename(difference_file_gif)
 
                         else:
                             # ex: google_landing_page and google_search_results do not match.
@@ -165,49 +166,49 @@ class ui_testing(object):
                 file_name = str(description) + '_' + browser + '_' + op_sys + file_extension
                 # add the directory where the file will be saved.
                 self.file_path = os.path.join(self.new_location, file_name)
-                # if the file already exists prompt the user if they want to overwrite or not.
-                if os.path.exists(self.file_path):
-                    inp = str(raw_input(os.path.basename(self.file_path) + " already exists, overwrite? (y/n): "))
-                    if inp.lower() == 'y': 
-                        # get_screenshot_as_file returns true if successful.
-                        if self.driver.get_screenshot_as_file(self.file_path):
-                            print "[SUCCESS] %s overwritten." % os.path.basename(self.file_path)
-                            # if user passed in element_specifier
-                            if element_specifier:
-                                # check to make sure a valid method was also passed in.
-                                if method in methods:   
-                                    # crop the element, returns true if successful                               
-                                    if self.cropElement(element_specifier, method):
-                                        print "[SUCCESS] %s cropped." % (os.path.basename(self.file_path))
-                                    else:
-                                        print "[ERROR] cropping %s failed." % element_specifier
-                                else:
-                                    # user did not pass element_specifier and a valid method to the function.
-                                    msg = "[ERROR] invalid parameters, please make sure an element specifier AND a method are being passed, see valid methods: \n" + str(methods)
-                                    self.driver.quit()
-                                    raise Exception(msg)
-                        else:
-                            print "[ERROR] saving %s failed." % os.path.basename(self.file_path)
-                else:
-                    # if file doesn't already exist, save the file, get_screenshot_as_file returns true if successful
-                    if self.driver.get_screenshot_as_file(self.file_path):
-                        print "[SUCCESS] %s saved." % os.path.basename(self.file_path) 
-                        # if user passed in an element_specifier
-                        if element_specifier:
-                            # make sure user also passed in a valid method
-                            if method in methods:         
-                                # crop the element, returns true if successful.                   
-                                if self.cropElement(element_specifier, method):
-                                    print "[SUCCESS] %s cropped." % (os.path.basename(self.file_path))
-                                else:
-                                   print "[ERROR] cropping %s failed." % element_specifier
+                # # if the file already exists prompt the user if they want to overwrite or not.
+                # if os.path.exists(self.file_path):
+                #     inp = str(raw_input(os.path.basename(self.file_path) + " already exists, overwrite? (y/n): "))
+                #     if inp.lower() == 'y': 
+                #         # get_screenshot_as_file returns true if successful.
+                #         if self.driver.get_screenshot_as_file(self.file_path):
+                #             print "[SUCCESS] %s overwritten." % os.path.basename(self.file_path)
+                #             # if user passed in element_specifier
+                #             if element_specifier:
+                #                 # check to make sure a valid method was also passed in.
+                #                 if method in methods:   
+                #                     # crop the element, returns true if successful                               
+                #                     if self.cropElement(element_specifier, method):
+                #                         print "[SUCCESS] %s cropped." % (os.path.basename(self.file_path))
+                #                     else:
+                #                         print "[ERROR] cropping %s failed." % element_specifier
+                #                 else:
+                #                     # user did not pass element_specifier and a valid method to the function.
+                #                     msg = "[ERROR] invalid parameters, please make sure an element specifier AND a method are being passed, see valid methods: \n" + str(methods)
+                #                     self.driver.quit()
+                #                     raise Exception(msg)
+                #         else:
+                #             print "[ERROR] saving %s failed." % os.path.basename(self.file_path)
+                # else:
+                # if file doesn't already exist, save the file, get_screenshot_as_file returns true if successful
+                if self.driver.get_screenshot_as_file(self.file_path):
+                    print "[SUCCESS] %s saved." % os.path.basename(self.file_path) 
+                    # if user passed in an element_specifier
+                    if element_specifier:
+                        # make sure user also passed in a valid method
+                        if method in methods:         
+                            # crop the element, returns true if successful.                   
+                            if self.cropElement(element_specifier, method):
+                                print "[SUCCESS] %s cropped." % (os.path.basename(self.file_path))
                             else:
-                                # user did not pass element_specifier and a valid method.
-                                msg = "[ERROR] invalid parameters, please make sure an element specifier AND a method are being passed, see valid methods: \n" + str(methods)
-                                self.driver.quit()
-                                raise Exception(msg)
-                    else:
-                        print "[ERROR] saving %s failed." % os.path.basename(self.file_path)
+                               print "[ERROR] cropping %s failed." % element_specifier
+                        else:
+                            # user did not pass element_specifier and a valid method.
+                            msg = "[ERROR] invalid parameters, please make sure an element specifier AND a method are being passed, see valid methods: \n" + str(methods)
+                            self.driver.quit()
+                            raise Exception(msg)
+                else:
+                    print "[ERROR] saving %s failed." % os.path.basename(self.file_path)
                 
         else:
             print "[ERROR] You need to specify a description."
