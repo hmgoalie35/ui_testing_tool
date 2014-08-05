@@ -42,11 +42,6 @@ class test(object):
         ## This will take a screenshot of the whole page, and then crop the image to just this element. it will find gbqfq by id.
         ui.generateFileNameAndTakeScreenshot('search_bar_with_text','id', 'gbqfq')
 
-        self.driver.find_element_by_css_selector("a.gb_A.gb_Ea").click()
-
-        ## xpath for the google logo. screenshot will be cropped to just this logo
-        ui.generateFileNameAndTakeScreenshot('search_results', 'xpath', '//*[@id="hplogo"]')
-
         ## don't forget to quit the driver before calling the compareScreenshots() function
         self.driver.quit()
 
