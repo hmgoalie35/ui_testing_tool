@@ -278,7 +278,10 @@ class ui_testing(object):
         self.diff_location = os.path.abspath(os.path.join(self.browser_folder, 'diff/'))
 
         # Make sure the comand line arg for --browser and the actual driver selenium is using match.
-        if self.driver.name != self.browser:
+        driverName = self.driver.name
+        if driverName == 'internet explorer':
+            driverName = 'ie'
+        if driverName != self.browser:
             self.driver.quit()
             raise Exception("[ERROR] the %s driver being used does not match the %s browser specified on the command line." % (self.driver.name, self.browser))
 
