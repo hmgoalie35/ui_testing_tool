@@ -43,14 +43,15 @@ say there is an anchor tag on the page
 the below line will take a screenshot and then crop the image to just this anchor tag.
 'id' is passed to tell the function that it should search for the element by id. There are also other possibilities such as xpath, css name, etc. See ui_testing.py for more info.
 ```
-ui.generateFileNameAndTakeScreenshot('test_2', 'id', 'back_btn'
+ui.generateFileNameAndTakeScreenshot('test_2', 'id', 'back_btn')
 
 ```
-When you are all done taking screenshots, the last line of code has to be. It is also good practice to quit the driver before comparing the screenshots.
+When you are all done taking screenshots, the last line of code has to be.
 ```
 self.driver.quit()
 ui.compareScreenshots()
 ```
+It is also good practice to quit the driver before comparing the screenshots.
 Running the script:
 on the command line
 the first time you run the program you need to generate baseline images. That is what the --baseline flag is for it is an optional flag.
