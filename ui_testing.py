@@ -2,33 +2,22 @@ from selenium.common.exceptions import NoSuchElementException
 from PIL import Image
 import platform
 import os
-import argparse
 import inspect
-
-# Command line args. --baseline specifies whether it is the baseline run or not. Baseline images need to be generated in order for this program to work. 
-# --browser specifies the browser the selenium test is using. A folder for the browser is created for organizational purposes.
-parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter, description="Run a selenium script and take screenshots of ui elements, to see if your code changes broke anything")
-parser.add_argument('--baseline', action='store_true', help="Generate the baseline images.")
-parser.add_argument('--browser', action='store', type=str, choices=['chrome', 'firefox', 'ie', 'safari'], required=True, help="The browser to run the test on.")
-
-# Parse what was sent via command line into a dictionary
-args = vars(parser.parse_args())
 
 # Valid methods selenium can use to search for an element on a page. See selenium python API for more info if desired.
 methods = ['id', 'name', 'xpath','link_text', 'partial_link_text', 'tag_name', 'class_name', 'css_selector']
 
 class ui_testing(object):
-    # Constructor that takes only a driver as an argument
-    def __init__(self, driver):
+    # Constructor that takes driver, browser, and is_baseline
+    def __init__(self, driver, browser, is_baseline):
         self.file_path = None
-        # Set the below two variables based on what was sent in via the command line.
-        self.is_baseline = args['baseline']
-        self.browser = args['browser']
+        self.is_baseline = is_baseline
+        self.browser = browser
         self.driver = driver
         # Set up the directories, see function documentation below.
         self.setUpDirectories()
     """
-    This only does anything if the baseline flag was not sent in via command line. (ie if it isnt the baseline run of the program)
+    This only does anything if this is not the baseline run.
     Compares the files only if they match. What i mean by match is that they have the same generated file name, minus the _baseline. 
     Calls imagemagick on the command line and saves the result in the difference file.
     """
