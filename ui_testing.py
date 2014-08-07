@@ -12,7 +12,7 @@ class ui_testing(object):
     def __init__(self, driver, browser, is_baseline):
         self.file_path = None
         self.is_baseline = is_baseline
-        self.browser = browser
+        self.browser = browser.lower()
         self.driver = driver
         # Set up the directories, see function documentation below.
         self.setUpDirectories()
@@ -35,7 +35,8 @@ class ui_testing(object):
                     for i in range(len(baselines)):
                         # check to make sure the file names match, otherwise we would be comparing different pictures and this would show some drastic differences.
                         # see generateFileNameAndTakeScreenshot to see how filenames are being generated and why the check below works. 
-                        if ((baselines[i].split('_baseline')[0] + '.png') == newfiles[i]):
+                        split = baselines[i].split('_baseline')
+                        if (split[0] + split[1] == newfiles[i]):
                             # generate the difference file that will be saved in the diff location
                             difference_file = os.path.abspath(os.path.join(self.diff_location, newfiles[i].replace('.png', '_diff.png')))
                             # for the .gif version, everything else is the same just change the extension. 
@@ -65,9 +66,10 @@ class ui_testing(object):
                             os.system("composite %s %s -compose difference %s" % (baselines[i], newfiles[i], difference_file))
                             print "[SUCCESS] %s saved." % os.path.basename((difference_file))
 
-                            os.system("convert -delay 100 %s %s -loop 0 %s" % (baselines[i], newfiles[i], difference_file.replace('.png', '.gif')))
+                            os.system("convert -delay 100 %s %s -loop 0 %s" % (baselines[i], newfiles[i], difference_file_gif))
                             print "[SUCCESS] %s saved." % os.path.basename(difference_file_gif)
 
+                            # os.system("compare -dissimilarity-threshold 1 -fuzz 20% -metric AE -highlight-color blue " + baselines[i] + " " + newfiles[i] + " " + difference_file.replace('_diff.png', '_test.png'))
                         else:
                             # ex: google_landing_page and google_search_results do not match.
                             print "[ERROR] files do not match, trying to compare %s and %s." % (baselines[i], newfiles[i])  
@@ -91,6 +93,9 @@ class ui_testing(object):
     def generateFileNameAndTakeScreenshot(self, description, method=None, element_specifier=None):
         # What browser the selenium object was instantiated with.
         browser = self.driver.name
+        if browser == "chrome" and (element_specifier or method):
+            self.driver.quit()
+            raise Exception("Cropping specific elements is not supported when using chrome, this is due to a limitation of chromedriver. Please remove %s & %s from the generateFileNameAndTakeScreenshot function and run again." % (method, element_specifier))
         # File extension
         file_extension = '.png'
         # The operating system
@@ -107,13 +112,57 @@ class ui_testing(object):
                 # If file already exists, prompt user to overwrite it or not.
                 if os.path.exists(self.file_path):
                     inp = str(raw_input(os.path.basename(self.file_path) + " already exists, overwrite? (y/n): "))
-                    if inp.lower() == "y":                      
-                        # get_screenshot_as_file returns true if screenshot was successfully saved.
+                    if inp.lower() == "y":      
+                        # cropping is not supported for chrome. due to the fact that chromedriver does not take fullscreen screenshots, have to manually
+                        # scroll the browser window and take screenshots after each scroll.
+                        if self.browser == "chrome":
+                            self.driver.get_screenshot_as_file(self.file_path)
+                            # need to refactor logic behind how many screenshots shot be taken, and how much should be scrolled.
+                            self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight/3);")   
+                            self.driver.get_screenshot_as_file(self.file_path.split('.png')[0] + '_1.png')
+                            self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight/2);")   
+                            self.driver.get_screenshot_as_file(self.file_path.split('.png')[0] + '_2.png')
+                            self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight/1);") 
+                            self.driver.get_screenshot_as_file(self.file_path.split('.png')[0] + '_3.png')
+                        else:                           
+                            # get_screenshot_as_file returns true if screenshot was successfully saved.
+                            if self.driver.get_screenshot_as_file(self.file_path):
+                                print "[SUCCESS] %s overwritten." % os.path.basename(self.file_path) 
+                                # if element_specifier was passed to the function
+                                if element_specifier:
+                                    # make sure user also passed in a valid method.
+                                    if method in methods:
+                                        # crop the element, returns true if successful.
+                                        if self.cropElement(element_specifier, method):
+                                            print "[SUCCESS] %s cropped." % (os.path.basename(self.file_path))
+                                        else:
+                                            print "[ERROR] cropping %s failed." % element_specifier
+                                    else:
+                                        # user did not pass element_specifier and a valid method to the function.
+                                        msg = "[ERROR] invalid parameters, please make sure an element specifier AND a method are being passed, see valid methods: \n" + str(methods)
+                                        self.driver.quit()
+                                        raise Exception(msg)
+                            else:
+                                print "[ERROR] saving %s failed." % os.path.basename(self.file_path)
+                else:  
+                    # cropping is not supported for chrome. due to the fact that chromedriver does not take fullscreen screenshots, have to manually
+                    # scroll the browser window and take screenshots after each scroll.
+                    if self.browser == "chrome":
+                        self.driver.get_screenshot_as_file(self.file_path)
+                        # need to refactor logic behind how many screenshots shot be taken, and how much should be scrolled.
+                        self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight/3);")   
+                        self.driver.get_screenshot_as_file(self.file_path.split('.png')[0] + '_1.png')
+                        self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight/2);")   
+                        self.driver.get_screenshot_as_file(self.file_path.split('.png')[0] + '_2.png')
+                        self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight/1);") 
+                        self.driver.get_screenshot_as_file(self.file_path.split('.png')[0] + '_3.png')   
+                    else:
+                        # get_screenshot_as_file returns true if screenshot was successfully saved.                 
                         if self.driver.get_screenshot_as_file(self.file_path):
-                            print "[SUCCESS] %s overwritten." % os.path.basename(self.file_path) 
+                            print "[SUCCESS] %s saved." % os.path.basename(self.file_path) 
                             # if element_specifier was passed to the function
-                            if element_specifier:
-                                # make sure user also passed in a valid method.
+                            if element_specifier:  
+                                # make sure user also passed in a valid method.                                                                          
                                 if method in methods:
                                     # crop the element, returns true if successful.
                                     if self.cropElement(element_specifier, method):
@@ -127,26 +176,6 @@ class ui_testing(object):
                                     raise Exception(msg)
                         else:
                             print "[ERROR] saving %s failed." % os.path.basename(self.file_path)
-                else:  
-                    # get_screenshot_as_file returns true if screenshot was successfully saved.                 
-                    if self.driver.get_screenshot_as_file(self.file_path):
-                        print "[SUCCESS] %s saved." % os.path.basename(self.file_path) 
-                        # if element_specifier was passed to the function
-                        if element_specifier:  
-                            # make sure user also passed in a valid method.                                                                          
-                            if method in methods:
-                                # crop the element, returns true if successful.
-                                if self.cropElement(element_specifier, method):
-                                    print "[SUCCESS] %s cropped." % (os.path.basename(self.file_path))
-                                else:
-                                    print "[ERROR] cropping %s failed." % element_specifier
-                            else:
-                                # user did not pass element_specifier and a valid method to the function.
-                                msg = "[ERROR] invalid parameters, please make sure an element specifier AND a method are being passed, see valid methods: \n" + str(methods)
-                                self.driver.quit()
-                                raise Exception(msg)
-                    else:
-                        print "[ERROR] saving %s failed." % os.path.basename(self.file_path)
                 
             else:
                 # if it is not the baseline run then we want to create the new images that will be used to create the diff images.
@@ -159,45 +188,68 @@ class ui_testing(object):
                 # if os.path.exists(self.file_path):
                 #     inp = str(raw_input(os.path.basename(self.file_path) + " already exists, overwrite? (y/n): "))
                 #     if inp.lower() == 'y': 
-                #         # get_screenshot_as_file returns true if successful.
-                #         if self.driver.get_screenshot_as_file(self.file_path):
-                #             print "[SUCCESS] %s overwritten." % os.path.basename(self.file_path)
-                #             # if user passed in element_specifier
-                #             if element_specifier:
-                #                 # check to make sure a valid method was also passed in.
-                #                 if method in methods:   
-                #                     # crop the element, returns true if successful                               
-                #                     if self.cropElement(element_specifier, method):
-                #                         print "[SUCCESS] %s cropped." % (os.path.basename(self.file_path))
-                #                     else:
-                #                         print "[ERROR] cropping %s failed." % element_specifier
-                #                 else:
-                #                     # user did not pass element_specifier and a valid method to the function.
-                #                     msg = "[ERROR] invalid parameters, please make sure an element specifier AND a method are being passed, see valid methods: \n" + str(methods)
-                #                     self.driver.quit()
-                #                     raise Exception(msg)
-                #         else:
-                #             print "[ERROR] saving %s failed." % os.path.basename(self.file_path)
+                        # cropping is not supported for chrome. due to the fact that chromedriver does not take fullscreen screenshots, have to manually
+                        # scroll the browser window and take screenshots after each scroll.
+                        # if self.browser == "chrome":
+                        #     self.driver.get_screenshot_as_file(self.file_path)
+                        #     self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight/3);")   
+                        #     self.driver.get_screenshot_as_file(self.file_path.split('.png')[0] + '_1.png')
+                        #     self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight/2);")   
+                        #     self.driver.get_screenshot_as_file(self.file_path.split('.png')[0] + '_2.png')
+                        #     self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight/1);") 
+                        #     self.driver.get_screenshot_as_file(self.file_path.split('.png')[0] + '_3.png')
+                        # else: 
+                    #         # get_screenshot_as_file returns true if successful.
+                    #         if self.driver.get_screenshot_as_file(self.file_path):
+                    #             print "[SUCCESS] %s overwritten." % os.path.basename(self.file_path)
+                    #             # if user passed in element_specifier
+                    #             if element_specifier:
+                    #                 # check to make sure a valid method was also passed in.
+                    #                 if method in methods:   
+                    #                     # crop the element, returns true if successful                               
+                    #                     if self.cropElement(element_specifier, method):
+                    #                         print "[SUCCESS] %s cropped." % (os.path.basename(self.file_path))
+                    #                     else:
+                    #                         print "[ERROR] cropping %s failed." % element_specifier
+                    #                 else:
+                    #                     # user did not pass element_specifier and a valid method to the function.
+                    #                     msg = "[ERROR] invalid parameters, please make sure an element specifier AND a method are being passed, see valid methods: \n" + str(methods)
+                    #                     self.driver.quit()
+                    #                     raise Exception(msg)
+                    #         else:
+                    #             print "[ERROR] saving %s failed." % os.path.basename(self.file_path)
                 # else:
-                # if file doesn't already exist, save the file, get_screenshot_as_file returns true if successful
-                if self.driver.get_screenshot_as_file(self.file_path):
-                    print "[SUCCESS] %s saved." % os.path.basename(self.file_path) 
-                    # if user passed in an element_specifier
-                    if element_specifier:
-                        # make sure user also passed in a valid method
-                        if method in methods:         
-                            # crop the element, returns true if successful.                   
-                            if self.cropElement(element_specifier, method):
-                                print "[SUCCESS] %s cropped." % (os.path.basename(self.file_path))
-                            else:
-                               print "[ERROR] cropping %s failed." % element_specifier
-                        else:
-                            # user did not pass element_specifier and a valid method.
-                            msg = "[ERROR] invalid parameters, please make sure an element specifier AND a method are being passed, see valid methods: \n" + str(methods)
-                            self.driver.quit()
-                            raise Exception(msg)
+                # cropping is not supported for chrome. due to the fact that chromedriver does not take fullscreen screenshots, have to manually
+                # scroll the browser window and take screenshots after each scroll.
+                if self.browser == "chrome":
+                    self.driver.get_screenshot_as_file(self.file_path)
+                    # need to refactor logic behind how many screenshots shot be taken, and how much should be scrolled.
+                    self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight/3);")   
+                    self.driver.get_screenshot_as_file(self.file_path.split('.png')[0] + '_1.png')
+                    self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight/2);")   
+                    self.driver.get_screenshot_as_file(self.file_path.split('.png')[0] + '_2.png')
+                    self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight/1);") 
+                    self.driver.get_screenshot_as_file(self.file_path.split('.png')[0] + '_3.png')               
                 else:
-                    print "[ERROR] saving %s failed." % os.path.basename(self.file_path)
+                    # if file doesn't already exist, save the file, get_screenshot_as_file returns true if successful
+                    if self.driver.get_screenshot_as_file(self.file_path):
+                        print "[SUCCESS] %s saved." % os.path.basename(self.file_path) 
+                        # if user passed in an element_specifier
+                        if element_specifier:
+                            # make sure user also passed in a valid method
+                            if method in methods:         
+                                # crop the element, returns true if successful.                   
+                                if self.cropElement(element_specifier, method):
+                                    print "[SUCCESS] %s cropped." % (os.path.basename(self.file_path))
+                                else:
+                                   print "[ERROR] cropping %s failed." % element_specifier
+                            else:
+                                # user did not pass element_specifier and a valid method.
+                                msg = "[ERROR] invalid parameters, please make sure an element specifier AND a method are being passed, see valid methods: \n" + str(methods)
+                                self.driver.quit()
+                                raise Exception(msg)
+                    else:
+                        print "[ERROR] saving %s failed." % os.path.basename(self.file_path)
                 
         else:
             print "[ERROR] You need to specify a description."
