@@ -425,6 +425,7 @@ class ui_testing(object):
             os.mkdir(self.new_location)
         if not os.path.exists(self.diff_location):
             os.mkdir(self.diff_location)
-
+    def __str__(self):
+        return "Baseline: %s \nBrowser: %s" % (self.is_baseline, self.browser)
 # if __name__ == '__main__':
 #      ui_testing(webdriver.Firefox())
