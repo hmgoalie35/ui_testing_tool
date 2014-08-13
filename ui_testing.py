@@ -3,6 +3,7 @@ from PIL import Image
 import platform
 import os
 import inspect
+import time
 
 # Valid methods selenium can use to search for an element on a page. See
 # selenium python API for more info if desired.
@@ -90,7 +91,7 @@ class ui_testing(object):
                                       (baselines[i], newfiles[i], difference_file_gif))
                             print "[SUCCESS] %s saved." % os.path.basename(difference_file_gif)
 
-                            # os.system("compare -dissimilarity-threshold 1 -fuzz 20% -metric AE -highlight-color blue " + baselines[i] + " " + newfiles[i] + " " + difference_file.replace('_diff.png', '_test.png'))
+                            # os.system("compare -dissimilarity-threshold 1 -fuzz 20% -metric AE -highlight-color blue " + baselines[i] + " " + newfiles[i] + " " + difference_file.replace('_diff.png', '_alternatediff.png'))
                         else:
                             # ex: google_landing_page and google_search_results
                             # do not match.
@@ -153,14 +154,17 @@ class ui_testing(object):
                             # scrolled.
                             self.driver.execute_script(
                                 "window.scrollTo(0, document.body.scrollHeight/3);")
+                            time.sleep(3)
                             self.driver.get_screenshot_as_file(
                                 self.file_path.split('.png')[0] + '_1.png')
                             self.driver.execute_script(
                                 "window.scrollTo(0, document.body.scrollHeight/2);")
+                            time.sleep(3)
                             self.driver.get_screenshot_as_file(
                                 self.file_path.split('.png')[0] + '_2.png')
                             self.driver.execute_script(
                                 "window.scrollTo(0, document.body.scrollHeight/1);")
+                            time.sleep(3)
                             self.driver.get_screenshot_as_file(
                                 self.file_path.split('.png')[0] + '_3.png')
                         else:
@@ -199,14 +203,17 @@ class ui_testing(object):
                         # shot be taken, and how much should be scrolled.
                         self.driver.execute_script(
                             "window.scrollTo(0, document.body.scrollHeight/3);")
+                        time.sleep(3)
                         self.driver.get_screenshot_as_file(
                             self.file_path.split('.png')[0] + '_1.png')
                         self.driver.execute_script(
                             "window.scrollTo(0, document.body.scrollHeight/2);")
+                        time.sleep(3)
                         self.driver.get_screenshot_as_file(
                             self.file_path.split('.png')[0] + '_2.png')
                         self.driver.execute_script(
                             "window.scrollTo(0, document.body.scrollHeight/1);")
+                        time.sleep(3)
                         self.driver.get_screenshot_as_file(
                             self.file_path.split('.png')[0] + '_3.png')
                     else:
@@ -253,10 +260,13 @@ class ui_testing(object):
                         # if self.browser == "chrome":
                         #     self.driver.get_screenshot_as_file(self.file_path)
                         #     self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight/3);")
+                        #     time.sleep(3)
                         #     self.driver.get_screenshot_as_file(self.file_path.split('.png')[0] + '_1.png')
                         #     self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight/2);")
+                        #     time.sleep(3)
                         #     self.driver.get_screenshot_as_file(self.file_path.split('.png')[0] + '_2.png')
                         #     self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight/1);")
+                        #     time.sleep(3)
                         #     self.driver.get_screenshot_as_file(self.file_path.split('.png')[0] + '_3.png')
                         # else:
                     # get_screenshot_as_file returns true if successful.
@@ -288,14 +298,17 @@ class ui_testing(object):
                     # be taken, and how much should be scrolled.
                     self.driver.execute_script(
                         "window.scrollTo(0, document.body.scrollHeight/3);")
+                    time.sleep(3)
                     self.driver.get_screenshot_as_file(
                         self.file_path.split('.png')[0] + '_1.png')
                     self.driver.execute_script(
                         "window.scrollTo(0, document.body.scrollHeight/2);")
+                    time.sleep(3)
                     self.driver.get_screenshot_as_file(
                         self.file_path.split('.png')[0] + '_2.png')
                     self.driver.execute_script(
                         "window.scrollTo(0, document.body.scrollHeight/1);")
+                    time.sleep(3)
                     self.driver.get_screenshot_as_file(
                         self.file_path.split('.png')[0] + '_3.png')
                 else:
