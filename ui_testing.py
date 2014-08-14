@@ -20,6 +20,8 @@ class ui_testing(object):
         self.is_baseline = is_baseline
         self.browser = browser.lower()
         self.driver = driver
+        # list to contain the names of files that have changed
+        self.difference_list = []
         # Set up the directories, see function documentation below.
         self.setUpDirectories()
     """
@@ -29,6 +31,7 @@ class ui_testing(object):
     """
 
     def compareScreenshots(self):
+        differences_found = False
         # only do this if not baseline
         if not self.is_baseline:
             # sort the list so files in each directory match up with one
@@ -40,7 +43,7 @@ class ui_testing(object):
             # would be an error at some point.
             if len(baselines) == len(newfiles):
                 try:
-                    print "Generating diff images..."
+                    print "Generating diff images (if any)..."
                     # iterate through all files
                     for i in range(len(baselines)):
                         # check to make sure the file names match, otherwise we would be comparing different pictures and this would show some drastic differences.
@@ -66,37 +69,50 @@ class ui_testing(object):
                                 os.path.join(self.baseline_location, baselines[i]))
                             newfiles[i] = os.path.abspath(
                                 os.path.join(self.new_location, newfiles[i]))
+                            # compare the histograms of the 2 images, and if they are not the same then generate the diff image, otherwise no need to generate a diff image if the images havn't changed
+                            i1 = Image.open(baselines[i])
+                            i2 = Image.open(newfiles[i])
+                            if i1.histogram() != i2.histogram():
+                                differences_found = True
+                                # keep track of the images reported as being changed.
+                                self.difference_list.append(os.path.basename(newfiles[i]))
+                                # if the generated diff file or diff gif file already exists prompt the user if they want to overwrite it.
+                                # if os.path.exists(difference_file) or os.path.exists(difference_file_gif):
+                                #     inp = str(raw_input(os.path.basename(difference_file) + " and " + os.path.basename(difference_file_gif) +  " already exist, overwrite BOTH? (y/n): "))
+                                #     if inp.lower() == "y":
+                                # the os.system calls below can be tweaked as desired, further digging into imagemagick's documentation may come up with a better way for comparison
+                                # os.system("composite %s %s -compose difference x:" % (baseline_file, test_file))
+                                #         os.system("composite %s %s -compose difference %s" % (baselines[i], newfiles[i], difference_file))
+                                # print "[SUCCESS] %s overwritten." %
+                                # os.path.basename((difference_file))
 
-                            # if the generated diff file or diff gif file already exists prompt the user if they want to overwrite it.
-                            # if os.path.exists(difference_file) or os.path.exists(difference_file_gif):
-                            #     inp = str(raw_input(os.path.basename(difference_file) + " and " + os.path.basename(difference_file_gif) +  " already exist, overwrite BOTH? (y/n): "))
-                            #     if inp.lower() == "y":
-                            # the os.system calls below can be tweaked as desired, further digging into imagemagick's documentation may come up with a better way for comparison
-                            # os.system("composite %s %s -compose difference x:" % (baseline_file, test_file))
-                            #         os.system("composite %s %s -compose difference %s" % (baselines[i], newfiles[i], difference_file))
-                            # print "[SUCCESS] %s overwritten." %
-                            # os.path.basename((difference_file))
+                                #         os.system("convert -delay 100 %s %s -loop 0 %s" % (baselines[i], newfiles[i], difference_file_gif))
+                                #         print "[SUCCESS] %s overwritten." % os.path.basename(difference_file_gif)
+                                # else:
 
-                            #         os.system("convert -delay 100 %s %s -loop 0 %s" % (baselines[i], newfiles[i], difference_file_gif))
-                            #         print "[SUCCESS] %s overwritten." % os.path.basename(difference_file_gif)
-                            # else:
+                                # the os.system calls below can be tweaked as desired, further digging into imagemagick's documentation may come up with a better way for comparison
+                                # os.system("composite %s %s -compose difference x:" % (baseline_file, test_file))
+                                os.system(
+                                    "composite %s %s -compose difference %s" %
+                                    (baselines[i], newfiles[i], difference_file))
+                                print "[SUCCESS] %s saved." % os.path.basename((difference_file))
 
-                            # the os.system calls below can be tweaked as desired, further digging into imagemagick's documentation may come up with a better way for comparison
-                            # os.system("composite %s %s -compose difference x:" % (baseline_file, test_file))
-                            os.system(
-                                "composite %s %s -compose difference %s" %
-                                (baselines[i], newfiles[i], difference_file))
-                            print "[SUCCESS] %s saved." % os.path.basename((difference_file))
+                                os.system("convert -delay 100 %s %s -loop 0 %s" %
+                                          (baselines[i], newfiles[i], difference_file_gif))
+                                print "[SUCCESS] %s saved." % os.path.basename(difference_file_gif)
 
-                            os.system("convert -delay 100 %s %s -loop 0 %s" %
-                                      (baselines[i], newfiles[i], difference_file_gif))
-                            print "[SUCCESS] %s saved." % os.path.basename(difference_file_gif)
 
-                            # os.system("compare -dissimilarity-threshold 1 -fuzz 20% -metric AE -highlight-color blue " + baselines[i] + " " + newfiles[i] + " " + difference_file.replace('_diff.png', '_alternatediff.png'))
+                                # os.system("compare -dissimilarity-threshold 1 -fuzz 20% -metric AE -highlight-color blue " + baselines[i] + " " + newfiles[i] + " " + difference_file.replace('_diff.png', '_alternatediff.png'))
                         else:
                             # ex: google_landing_page and google_search_results
                             # do not match.
                             print "[ERROR] files do not match, trying to compare %s and %s." % (baselines[i], newfiles[i])
+
+                    if differences_found:
+                        print "[INFO] differences found, the file(s) with differences are: \n" + '\n'.join(self.difference_list)
+                    else:
+                        print "[INFO] no differences found!"
+
                 except IOError:
                     print "[ERROR] file or folder not found."
             else:
