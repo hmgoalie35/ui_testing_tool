@@ -168,7 +168,7 @@ class ui_testing(object):
                         # scroll the browser window and take screenshots after
                         # each scroll.
                         if self.browser == "chrome":
-                            js_code = "var scrollValue=document.body.scrollHeight/window.innerHeight;return scrollValue;"
+                            js_code = "window.scrollTo(0,0);var scrollValue=document.body.scrollHeight/window.innerHeight;return scrollValue;"
 
                             val = math.floor(self.driver.execute_script(js_code))
                             i = 0
@@ -176,7 +176,7 @@ class ui_testing(object):
                                 print "[SUCCESS] %s saved." % os.path.basename((self.file_path.split('.png')[0] + '_' + str(i) + '.png'))
                             else:
                                 print "[ERROR] saving %s failed." % os.path.basename((self.file_path.split('.png')[0] + '_' + str(i) + '.png'))
-                            # only bother scrolling if the page needs to be scrolled.
+                            # only bother scrolling if the page needs to be scrolled, note this is compiled code.
                             if self.driver.execute_script('window.scrollTo(0,1);return 0!=window.pageYOffset?(window.scrollTo(0,0),!0):(window.scrollTo(0,0),!1);'):
                                 while i < val:
                                     self.driver.execute_script('window.scrollBy(0, window.innerHeight);')
@@ -217,7 +217,7 @@ class ui_testing(object):
                     # scroll the browser window and take screenshots after each
                     # scroll.
                     if self.browser == "chrome":
-                        js_code = "var scrollValue=document.body.scrollHeight/window.innerHeight;return scrollValue;"
+                        js_code = "window.scrollTo(0,0);var scrollValue=document.body.scrollHeight/window.innerHeight;return scrollValue;"
 
                         val = math.floor(self.driver.execute_script(js_code))
                         i = 0
@@ -225,7 +225,7 @@ class ui_testing(object):
                             print "[SUCCESS] %s saved." % os.path.basename((self.file_path.split('.png')[0] + '_' + str(i) + '.png'))
                         else:
                             print "[ERROR] saving %s failed." % os.path.basename((self.file_path.split('.png')[0] + '_' + str(i) + '.png'))
-                        # only bother scrolling if the page needs to be scrolled.
+                        # only bother scrolling if the page needs to be scrolled. note this is compiled code.
                         if self.driver.execute_script('window.scrollTo(0,1);return 0!=window.pageYOffset?(window.scrollTo(0,0),!0):(window.scrollTo(0,0),!1);'):
                             while i < val:
                                 self.driver.execute_script('window.scrollBy(0, window.innerHeight);')
@@ -312,7 +312,7 @@ class ui_testing(object):
                 # scroll the browser window and take screenshots after each
                 # scroll.
                 if self.browser == "chrome":
-                    js_code = "var scrollValue=document.body.scrollHeight/window.innerHeight;return scrollValue;"
+                    js_code = "window.scrollTo(0,0);var scrollValue=document.body.scrollHeight/window.innerHeight;return scrollValue;"
 
                     val = math.floor(self.driver.execute_script(js_code))
                     i = 0
@@ -320,7 +320,7 @@ class ui_testing(object):
                         print "[SUCCESS] %s saved." % os.path.basename((self.file_path.split('.png')[0] + '_' + str(i) + '.png'))
                     else:
                         print "[ERROR] saving %s failed." % os.path.basename((self.file_path.split('.png')[0] + '_' + str(i) + '.png'))
-                    # only bother scrolling if the page needs to be scrolled.
+                    # only bother scrolling if the page needs to be scrolled. note this is compiled code
                     if self.driver.execute_script('window.scrollTo(0,1);return 0!=window.pageYOffset?(window.scrollTo(0,0),!0):(window.scrollTo(0,0),!1);'):
                         while i < val:
                             self.driver.execute_script('window.scrollBy(0, window.innerHeight);')
