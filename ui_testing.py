@@ -31,7 +31,6 @@ class ui_testing(object):
     """
 
     def compareScreenshots(self):
-        differences_found = False
         # only do this if not baseline
         if not self.is_baseline:
             # sort the list so files in each directory match up with one
@@ -73,7 +72,6 @@ class ui_testing(object):
                             i1 = Image.open(baselines[i])
                             i2 = Image.open(newfiles[i])
                             if i1.histogram() != i2.histogram():
-                                differences_found = True
                                 # keep track of the images reported as being changed.
                                 self.difference_list.append(os.path.basename(newfiles[i]))
                                 # if the generated diff file or diff gif file already exists prompt the user if they want to overwrite it.
@@ -108,7 +106,7 @@ class ui_testing(object):
                             # do not match.
                             print "[ERROR] files do not match, trying to compare %s and %s." % (baselines[i], newfiles[i])
 
-                    if differences_found:
+                    if len(self.difference_list) > 0:
                         print "[INFO] differences found, the file(s) with differences are: \n" + '\n'.join(self.difference_list)
                     else:
                         print "[INFO] no differences found!"
