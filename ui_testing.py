@@ -176,14 +176,16 @@ class ui_testing(object):
                                 print "[SUCCESS] %s saved." % os.path.basename((self.file_path.split('.png')[0] + '_' + str(i) + '.png'))
                             else:
                                 print "[ERROR] saving %s failed." % os.path.basename((self.file_path.split('.png')[0] + '_' + str(i) + '.png'))
-                            while i < val:
-                                self.driver.execute_script('window.scrollBy(0, window.innerHeight);')
-                                time.sleep(3)
-                                if self.driver.get_screenshot_as_file(self.file_path.split('.png')[0] + '_' + str(i+1) + '.png'):
-                                    print "[SUCCESS] %s saved." % os.path.basename((self.file_path.split('.png')[0] + '_' + str(i+1) + '.png'))
-                                else:
-                                    print "[ERROR] saving %s failed." % os.path.basename((self.file_path.split('.png')[0] + '_' + str(i+1) + '.png'))
-                                i+=1
+                            # only bother scrolling if the page needs to be scrolled.
+                            if self.driver.execute_script('window.scrollTo(0,1);return 0!=window.pageYOffset?(window.scrollTo(0,0),!0):(window.scrollTo(0,0),!1);'):
+                                while i < val:
+                                    self.driver.execute_script('window.scrollBy(0, window.innerHeight);')
+                                    time.sleep(3)
+                                    if self.driver.get_screenshot_as_file(self.file_path.split('.png')[0] + '_' + str(i+1) + '.png'):
+                                        print "[SUCCESS] %s saved." % os.path.basename((self.file_path.split('.png')[0] + '_' + str(i+1) + '.png'))
+                                    else:
+                                        print "[ERROR] saving %s failed." % os.path.basename((self.file_path.split('.png')[0] + '_' + str(i+1) + '.png'))
+                                    i+=1
                         else:
                             # get_screenshot_as_file returns true if screenshot
                             # was successfully saved.
@@ -318,14 +320,16 @@ class ui_testing(object):
                         print "[SUCCESS] %s saved." % os.path.basename((self.file_path.split('.png')[0] + '_' + str(i) + '.png'))
                     else:
                         print "[ERROR] saving %s failed." % os.path.basename((self.file_path.split('.png')[0] + '_' + str(i) + '.png'))
-                    while i < val:
-                        self.driver.execute_script('window.scrollBy(0, window.innerHeight);')
-                        time.sleep(3)
-                        if self.driver.get_screenshot_as_file(self.file_path.split('.png')[0] + '_' + str(i+1) + '.png'):
-                            print "[SUCCESS] %s saved." % os.path.basename((self.file_path.split('.png')[0] + '_' + str(i+1) + '.png'))
-                        else:
-                            print "[ERROR] saving %s failed." % os.path.basename((self.file_path.split('.png')[0] + '_' + str(i+1) + '.png'))
-                        i+=1
+                    # only bother scrolling if the page needs to be scrolled.
+                    if self.driver.execute_script('window.scrollTo(0,1);return 0!=window.pageYOffset?(window.scrollTo(0,0),!0):(window.scrollTo(0,0),!1);'):
+                        while i < val:
+                            self.driver.execute_script('window.scrollBy(0, window.innerHeight);')
+                            time.sleep(3)
+                            if self.driver.get_screenshot_as_file(self.file_path.split('.png')[0] + '_' + str(i+1) + '.png'):
+                                print "[SUCCESS] %s saved." % os.path.basename((self.file_path.split('.png')[0] + '_' + str(i+1) + '.png'))
+                            else:
+                                print "[ERROR] saving %s failed." % os.path.basename((self.file_path.split('.png')[0] + '_' + str(i+1) + '.png'))
+                            i+=1
                 else:
                     # if file doesn't already exist, save the file,
                     # get_screenshot_as_file returns true if successful
