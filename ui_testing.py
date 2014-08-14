@@ -4,6 +4,7 @@ import platform
 import os
 import inspect
 import time
+import math
 
 # Valid methods selenium can use to search for an element on a page. See
 # selenium python API for more info if desired.
@@ -137,10 +138,13 @@ class ui_testing(object):
                 file_name = str(description) + '_' +  browser + \
                     '_' + op_sys + '_baseline' + file_extension
                 # Add the directory where this file should be saved.
-                self.file_path = os.path.join(
-                    self.baseline_location, file_name)
+                self.file_path = os.path.join(self.baseline_location, file_name)
+                if self.browser == 'chrome':
+                    file_exists = os.path.exists(os.path.join(self.baseline_location, file_name.split('.png')[0] + '_0' + '.png')) or os.path.exists(os.path.join(self.baseline_location, file_name.split('.png')[0] + '_1' + '.png')) or os.path.exists(os.path.join(self.baseline_location, file_name.split('.png')[0] + '_2' + '.png')) or os.path.exists(os.path.join(self.baseline_location, file_name.split('.png')[0] + '_3' + '.png')) or os.path.exists(os.path.join(self.baseline_location, file_name.split('.png')[0] + '_4' + '.png')) or os.path.exists(os.path.join(self.baseline_location, file_name.split('.png')[0] + '_5' + '.png')) or os.path.exists(os.path.join(self.baseline_location, file_name.split('.png')[0] + '_6' + '.png'))
+                else:
+                    file_exists = os.path.exists(self.file_path)
                 # If file already exists, prompt user to overwrite it or not.
-                if os.path.exists(self.file_path):
+                if file_exists:
                     inp = str(
                         raw_input(os.path.basename(self.file_path) + " already exists, overwrite? (y/n): "))
                     if inp.lower() == "y":
@@ -148,25 +152,22 @@ class ui_testing(object):
                         # scroll the browser window and take screenshots after
                         # each scroll.
                         if self.browser == "chrome":
-                            self.driver.get_screenshot_as_file(self.file_path)
-                            # need to refactor logic behind how many
-                            # screenshots shot be taken, and how much should be
-                            # scrolled.
-                            self.driver.execute_script(
-                                "window.scrollTo(0, document.body.scrollHeight/3);")
-                            time.sleep(3)
-                            self.driver.get_screenshot_as_file(
-                                self.file_path.split('.png')[0] + '_1.png')
-                            self.driver.execute_script(
-                                "window.scrollTo(0, document.body.scrollHeight/2);")
-                            time.sleep(3)
-                            self.driver.get_screenshot_as_file(
-                                self.file_path.split('.png')[0] + '_2.png')
-                            self.driver.execute_script(
-                                "window.scrollTo(0, document.body.scrollHeight/1);")
-                            time.sleep(3)
-                            self.driver.get_screenshot_as_file(
-                                self.file_path.split('.png')[0] + '_3.png')
+                            js_code = "var scrollValue=document.body.scrollHeight/window.innerHeight;return scrollValue;"
+
+                            val = math.floor(self.driver.execute_script(js_code))
+                            i = 0
+                            if self.driver.get_screenshot_as_file(self.file_path.split('.png')[0] + '_' + str(i) + '.png'): 
+                                print "[SUCCESS] %s saved." % os.path.basename((self.file_path.split('.png')[0] + '_' + str(i) + '.png'))
+                            else:
+                                print "[ERROR] saving %s failed." % os.path.basename((self.file_path.split('.png')[0] + '_' + str(i) + '.png'))
+                            while i < val:
+                                self.driver.execute_script('window.scrollBy(0, window.innerHeight);')
+                                time.sleep(3)
+                                if self.driver.get_screenshot_as_file(self.file_path.split('.png')[0] + '_' + str(i+1) + '.png'):
+                                    print "[SUCCESS] %s saved." % os.path.basename((self.file_path.split('.png')[0] + '_' + str(i+1) + '.png'))
+                                else:
+                                    print "[ERROR] saving %s failed." % os.path.basename((self.file_path.split('.png')[0] + '_' + str(i+1) + '.png'))
+                                i+=1
                         else:
                             # get_screenshot_as_file returns true if screenshot
                             # was successfully saved.
@@ -198,24 +199,22 @@ class ui_testing(object):
                     # scroll the browser window and take screenshots after each
                     # scroll.
                     if self.browser == "chrome":
-                        self.driver.get_screenshot_as_file(self.file_path)
-                        # need to refactor logic behind how many screenshots
-                        # shot be taken, and how much should be scrolled.
-                        self.driver.execute_script(
-                            "window.scrollTo(0, document.body.scrollHeight/3);")
-                        time.sleep(3)
-                        self.driver.get_screenshot_as_file(
-                            self.file_path.split('.png')[0] + '_1.png')
-                        self.driver.execute_script(
-                            "window.scrollTo(0, document.body.scrollHeight/2);")
-                        time.sleep(3)
-                        self.driver.get_screenshot_as_file(
-                            self.file_path.split('.png')[0] + '_2.png')
-                        self.driver.execute_script(
-                            "window.scrollTo(0, document.body.scrollHeight/1);")
-                        time.sleep(3)
-                        self.driver.get_screenshot_as_file(
-                            self.file_path.split('.png')[0] + '_3.png')
+                        js_code = "var scrollValue=document.body.scrollHeight/window.innerHeight;return scrollValue;"
+
+                        val = math.floor(self.driver.execute_script(js_code))
+                        i = 0
+                        if self.driver.get_screenshot_as_file(self.file_path.split('.png')[0] + '_' + str(i) + '.png'): 
+                            print "[SUCCESS] %s saved." % os.path.basename((self.file_path.split('.png')[0] + '_' + str(i) + '.png'))
+                        else:
+                            print "[ERROR] saving %s failed." % os.path.basename((self.file_path.split('.png')[0] + '_' + str(i) + '.png'))
+                        while i < val:
+                            self.driver.execute_script('window.scrollBy(0, window.innerHeight);')
+                            time.sleep(3)
+                            if self.driver.get_screenshot_as_file(self.file_path.split('.png')[0] + '_' + str(i+1) + '.png'):
+                                print "[SUCCESS] %s saved." % os.path.basename((self.file_path.split('.png')[0] + '_' + str(i+1) + '.png'))
+                            else:
+                                print "[ERROR] saving %s failed." % os.path.basename((self.file_path.split('.png')[0] + '_' + str(i+1) + '.png'))
+                            i+=1
                     else:
                         # get_screenshot_as_file returns true if screenshot was
                         # successfully saved.
@@ -293,24 +292,22 @@ class ui_testing(object):
                 # scroll the browser window and take screenshots after each
                 # scroll.
                 if self.browser == "chrome":
-                    self.driver.get_screenshot_as_file(self.file_path)
-                    # need to refactor logic behind how many screenshots shot
-                    # be taken, and how much should be scrolled.
-                    self.driver.execute_script(
-                        "window.scrollTo(0, document.body.scrollHeight/3);")
-                    time.sleep(3)
-                    self.driver.get_screenshot_as_file(
-                        self.file_path.split('.png')[0] + '_1.png')
-                    self.driver.execute_script(
-                        "window.scrollTo(0, document.body.scrollHeight/2);")
-                    time.sleep(3)
-                    self.driver.get_screenshot_as_file(
-                        self.file_path.split('.png')[0] + '_2.png')
-                    self.driver.execute_script(
-                        "window.scrollTo(0, document.body.scrollHeight/1);")
-                    time.sleep(3)
-                    self.driver.get_screenshot_as_file(
-                        self.file_path.split('.png')[0] + '_3.png')
+                    js_code = "var scrollValue=document.body.scrollHeight/window.innerHeight;return scrollValue;"
+
+                    val = math.floor(self.driver.execute_script(js_code))
+                    i = 0
+                    if self.driver.get_screenshot_as_file(self.file_path.split('.png')[0] + '_' + str(i) + '.png'): 
+                        print "[SUCCESS] %s saved." % os.path.basename((self.file_path.split('.png')[0] + '_' + str(i) + '.png'))
+                    else:
+                        print "[ERROR] saving %s failed." % os.path.basename((self.file_path.split('.png')[0] + '_' + str(i) + '.png'))
+                    while i < val:
+                        self.driver.execute_script('window.scrollBy(0, window.innerHeight);')
+                        time.sleep(3)
+                        if self.driver.get_screenshot_as_file(self.file_path.split('.png')[0] + '_' + str(i+1) + '.png'):
+                            print "[SUCCESS] %s saved." % os.path.basename((self.file_path.split('.png')[0] + '_' + str(i+1) + '.png'))
+                        else:
+                            print "[ERROR] saving %s failed." % os.path.basename((self.file_path.split('.png')[0] + '_' + str(i+1) + '.png'))
+                        i+=1
                 else:
                     # if file doesn't already exist, save the file,
                     # get_screenshot_as_file returns true if successful
