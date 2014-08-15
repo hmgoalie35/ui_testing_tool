@@ -3,6 +3,19 @@ ui_testing_tool
 
 Utilizes ImageMagick and Selenium to test UI elements that may have changed due to css or html changes
 
+For info and a getting started guide, see template.py. The ui_testing.py code is also very well documented so delve into that for more info. See the demo and ui_test_examples folders to see what the program does.
+
+Extremely basic example, see the baseline and new images to see what changed. Below are the diff images.
+
+The .gif generated
+
+![gif](https://github.com/hmgoalie35/ui_testing_tool/blob/dev/ui_testing_examples/chrome/diff/whats_up_link_chrome_windows_0_diff.gif)
+
+The .png generated
+
+![png](https://github.com/hmgoalie35/ui_testing_tool/blob/dev/ui_testing_examples/chrome/diff/whats_up_link_chrome_windows_0_diff.png)
+
+The beauty is that these diff images can be tweaked as you desired, just dig into ImageMagick's documentation and then change the os.system call in the ui_testing.py
 
 Dependencies (Linux):
 
