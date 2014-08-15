@@ -14,43 +14,49 @@ sudo apt-get imagemagick
 
 Other OS's 
 
+ImageMagick
+
 http://www.imagemagick.org/script/binary-releases.php
 
-See the selenium documentation: http://docs.seleniumhq.org/download/
+Selenium
 
-In order to use Chrome, IE or Safari with selenium you will need to download the appropriate drivers.
+http://docs.seleniumhq.org/download/
 
-PIL -- http://www.pythonware.com/products/pil/
+In order to use Chrome, IE or Safari with selenium you will need to download the appropriate drivers. See above.
+
+PIL
+
+http://www.pythonware.com/products/pil/
 
 Use:
 
-Beware that if you are running the script again then you might be generating file names that already exist, the selenium program may seem like it is stuck, but just go to the terminal window and there should be a prompt to overwrite the file or not.
+Beware that if you are running the script again in baseline mode, then you might be generating file names that already exist, the selenium program may seem like it is stuck, but just go to the terminal window and there should be a prompt to overwrite the file or not.
 
 The status of every operation is logged in the console.
 
-In your selenium code, create a ui_testing object, passing in the driver. Make sure ui_testing.py is in the same folder as the selenium script you are writing, or see the template.py file. 
+In your selenium code, create a ui_testing object, passing in the driver, browser and True or False if the run is baseline or not. Make sure ui_testing.py is in the same folder as the selenium script you are writing, or see the template.py file for instructions on running scripts in different directories from the ui_testing.py file.
 ```
 from selenium import webdriver
 self.driver = webdriver.Firefox()
-ui = ui_testing(self.driver)
+ui = ui_testing(self.driver, 'firefox', True)# change True to False to run in non-baseline mode and generate diff images (if any)
 ```
 You can now use all of the functions in the ui_testing module.
 
+This will take a screenshot and label the output file with the description 'test_1' file name will be test_1_firefox_linux_baseline.png. this varies depending on OS and browser being used.
+
 ```
-# This will take a screenshot and label the output file with the description 'test_1'
-# file name will be test_1_firefox_linux_baseline.png. this varies depending on OS and browser being used.
 ui.generateFileNameAndTakeScreenshot('test_1')
 # selenium code
 # selenium code
 ```
 
-say there is an anchor tag on the page
+say there is an anchor tag on the page with the id back_btn
 
 ```
 <a href="http://www.google.com" id='back_btn' style="color:red;">Press Me</a>
 ```
 the below line will take a screenshot and then crop the image to just this anchor tag.
-'id' is passed to tell the function that it should search for the element by id. There are also other possibilities such as xpath, css name, etc. See ui_testing.py for more info.
+'id' is passed to tell the function that it should search for the element by id. There are also other possibilities such as xpath, css name, etc. See ui_testing.py for more info. (cropping only supported when using firefox, due to a limitation of chromedriver.)
 ```
 ui.generateFileNameAndTakeScreenshot('test_2', 'id', 'back_btn')
 
@@ -63,19 +69,14 @@ ui.compareScreenshots()
 It is good practice to quit the driver before comparing the screenshots.
 
 Running the script:
-on the command line
-the first time you run the program you need to generate baseline images. That is what the --baseline flag is for it is an optional flag.
---browser is required for every run. make sure that you have the appropriate drivers installed for running firefox, IE, etc.
-```
-python yourFile.py --baseline --browser firefox
-```
-Terminal output
+Just run your selenium code as you would.
+
+Terminal output looks like this.
 
 ```
 [SUCCESS] test_1_firefox_linux_baseline.png saved.
 ```
 
-Alternatively, below will generate the new images on firefox.
-```
-python yourFile.py --browser firefox 
-```
+Remember to first generate your baseline images.
+
+Shoot me an email if you have any questions, hpittin1@binghamton.edu
