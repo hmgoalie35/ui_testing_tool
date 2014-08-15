@@ -1,0 +1,2 @@
+This folder contains a very basic example of what this module does.
+I changed the html and css so there are changes.In the difference folder there is a .gif file generated that shows the differences. The .png file simply shows the differences in a composite overlay fashion

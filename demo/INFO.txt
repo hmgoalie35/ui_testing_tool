@@ -1,0 +1,4 @@
+FYI, the files in these folders show examples of cropping on firefox and how screenshots are generated on chrome. There are no diff images on purpose, because i don't have access to the source of github to be able to make css/html changes.
+See the ui_testing_examples folder for an extremely simply example using django.
+
+Also, the screenshots for this file were generated via the template.py file.
