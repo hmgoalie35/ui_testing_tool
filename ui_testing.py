@@ -41,6 +41,9 @@ class ui_testing(object):
         # list to contain the names of files that have changed, if any.
         self.difference_list = []
 
+        # used in generating file names for chrome
+        self.count = 1
+
         # Set up the directories, see function documentation below.
         self.setUpDirectories()
     """
@@ -153,10 +156,8 @@ class ui_testing(object):
         """
 
     def generateFileNameAndTakeScreenshot(self, description, method=None, element_specifier=None):
-        # What browser the selenium object was instantiated with.
-        browser = self.driver.name
         # If the browser is chrome and an element_specifier or method was passed (i.e. user is trying to crop an element) throw an error.
-        if browser == "chrome" and (element_specifier or method):
+        if self.browser == "chrome" and (element_specifier or method):
             self.driver.quit()
             raise Exception(
                 "Cropping specific elements is not supported when using chrome, this is due to a limitation of chromedriver. Please remove %s & %s from the generateFileNameAndTakeScreenshot function and run again." %
@@ -173,19 +174,21 @@ class ui_testing(object):
                 # Generate the file name. This is created by concatenating the
                 # description, browser and operating system. _baseline is also
                 # appended for clarification.
-                file_name = str(description) + '_' +  browser + \
+                file_name = str(description) + '_' +  self.browser + \
                     '_' + op_sys + '_baseline' + file_extension
                 # Add the directory where this file should be saved.
                 self.file_path = os.path.join(self.baseline_location, file_name)
                 # if the browser is chrome then the screenshots that are generated all have _baseline_NUMBER_HERE.png. So need to check if those already exist.
                 # it is likely that if _baseline_0.png exists then the others do also but the chained or's are for safety.
-                #TODO enable check for any number at the end of the file (currently goes up to 6)
+                #TODO enable check for any number at the end of the file (currently goes up to 7)
                 if self.browser == 'chrome':
-                    file_exists = os.path.exists(os.path.join(self.baseline_location, file_name.split('.png')[0] + '_0' + '.png')) or os.path.exists(os.path.join(self.baseline_location, file_name.split('.png')[0] + '_1' + '.png')) or os.path.exists(os.path.join(self.baseline_location, file_name.split('.png')[0] + '_2' + '.png')) or os.path.exists(os.path.join(self.baseline_location, file_name.split('.png')[0] + '_3' + '.png')) or os.path.exists(os.path.join(self.baseline_location, file_name.split('.png')[0] + '_4' + '.png')) or os.path.exists(os.path.join(self.baseline_location, file_name.split('.png')[0] + '_5' + '.png')) or os.path.exists(os.path.join(self.baseline_location, file_name.split('.png')[0] + '_6' + '.png'))
+                    split = os.path.split(self.file_path)
+                    file_exists = os.path.exists(os.path.join(split[0], str(0) + '_' + split[1])) or os.path.exists(os.path.join(split[0], str(1) + '_' + split[1])) or os.path.exists(os.path.join(split[0], str(2) + '_' + split[1])) or os.path.exists(os.path.join(split[0], str(3) + '_' + split[1])) or os.path.exists(os.path.join(split[0], str(4) + '_' + split[1])) or os.path.exists(os.path.join(split[0], str(5) + '_' + split[1])) or os.path.exists(os.path.join(split[0], str(6) + '_' + split[1])) or os.path.exists(os.path.join(split[0], str(7) + '_' + split[1]))
                 # for other browsers just use the normal file_path that was generated.
                 else:
                     file_exists = os.path.exists(self.file_path)
                 # If file already exists, prompt user to overwrite it or not.
+                # Entering in y will overwrite all of the screenshots for a webpage on chrome. 1_description ... 4_description will all be overwritten
                 if file_exists:
                     # get user input (y or n)
                     inp = str(
@@ -202,26 +205,35 @@ class ui_testing(object):
                             # This was honestly figured out from pure trial and error.
                             val = math.floor(self.driver.execute_script(js_code))
                             i = 0
+                            # split the directory and file name so i can append the number to the beginning of the file name.
+                            split =  os.path.split(self.file_path)
+                            # add in the number specifier
+                            file_name = os.path.join(split[0], str(self.count) + '_' + split[1])
+                            self.count +=1
                             # Take the initial screenshot of the page no scrolling occurred yet.
-                            # Note baseline_NUMBER_HERE is being appended.
+                            # Note specific number is being appended to the beginning of the file name.
                             # selenium's get_screenshot_as_file returns true if all is well.
-                            if self.driver.get_screenshot_as_file(self.file_path.split('.png')[0] + '_' + str(i) + '.png'): 
-                                print "[SUCCESS] %s saved." % os.path.basename((self.file_path.split('.png')[0] + '_' + str(i) + '.png'))
+                            if self.driver.get_screenshot_as_file(file_name): 
+                                print "[SUCCESS] %s saved." % os.path.basename(file_name)
                             else:
-                                print "[ERROR] saving %s failed." % os.path.basename((self.file_path.split('.png')[0] + '_' + str(i) + '.png'))
-                            # only bother scrolling if the page needs to be scrolled, note this js code is compiled code.
+                                print "[ERROR] saving %s failed." % os.path.basename(file_name)
+                            # only bother scrolling if the page needs to be scrolled. note this is compiled code.
                             if self.driver.execute_script('window.scrollTo(0,1);return 0!=window.pageYOffset?(window.scrollTo(0,0),!0):(window.scrollTo(0,0),!1);'):
-                                # val is the number of times we need to scroll, so need to generate this # of screenshots.
+                                # val is the number of times we need to scroll, so need to generate this # of screenshots.     
                                 while i < val:
                                     # scroll the page, because we already took the initial screenshot above.
                                     self.driver.execute_script('window.scrollBy(0, window.innerHeight);')
                                     # this sleep is needed because selenium tends to advance to the next webpage before this code can finish.
                                     time.sleep(3)
+
+                                    file_name = os.path.join(split[0], str(self.count) + '_' + split[1])
+                                    self.count +=1
+
                                     # selenium's get_screenshot_as_file returns true if all is well.
-                                    if self.driver.get_screenshot_as_file(self.file_path.split('.png')[0] + '_' + str(i+1) + '.png'):
-                                        print "[SUCCESS] %s saved." % os.path.basename((self.file_path.split('.png')[0] + '_' + str(i+1) + '.png'))
+                                    if self.driver.get_screenshot_as_file(file_name):
+                                        print "[SUCCESS] %s saved." % os.path.basename(file_name)
                                     else:
-                                        print "[ERROR] saving %s failed." % os.path.basename((self.file_path.split('.png')[0] + '_' + str(i+1) + '.png'))
+                                        print "[ERROR] saving %s failed." % os.path.basename(file_name)
                                     i+=1
                         # browser isn't chrome
                         else:
@@ -262,13 +274,19 @@ class ui_testing(object):
                         # This was honestly figured out from pure trial and error.
                         val = math.floor(self.driver.execute_script(js_code))
                         i = 0
+                        # split the directory and file name so i can append the number to the beginning of the file name.
+                        split =  os.path.split(self.file_path)
+                        # add in the number specifier
+                        file_name = os.path.join(split[0], str(self.count) + '_' + split[1])
+                        self.count +=1
+
                         # Take the initial screenshot of the page no scrolling occurred yet.
                         # Note baseline_NUMBER_HERE is being appended.
                         # selenium's get_screenshot_as_file returns true if all is well.
-                        if self.driver.get_screenshot_as_file(self.file_path.split('.png')[0] + '_' + str(i) + '.png'): 
-                            print "[SUCCESS] %s saved." % os.path.basename((self.file_path.split('.png')[0] + '_' + str(i) + '.png'))
+                        if self.driver.get_screenshot_as_file(file_name): 
+                            print "[SUCCESS] %s saved." % os.path.basename(file_name)
                         else:
-                            print "[ERROR] saving %s failed." % os.path.basename((self.file_path.split('.png')[0] + '_' + str(i) + '.png'))
+                            print "[ERROR] saving %s failed." % os.path.basename(file_name)
                         # only bother scrolling if the page needs to be scrolled. note this is compiled code.
                         if self.driver.execute_script('window.scrollTo(0,1);return 0!=window.pageYOffset?(window.scrollTo(0,0),!0):(window.scrollTo(0,0),!1);'):
                             # val is the number of times we need to scroll, so need to generate this # of screenshots.     
@@ -277,11 +295,15 @@ class ui_testing(object):
                                 self.driver.execute_script('window.scrollBy(0, window.innerHeight);')
                                 # this sleep is needed because selenium tends to advance to the next webpage before this code can finish.
                                 time.sleep(3)
+
+                                file_name = os.path.join(split[0], str(self.count) + '_' + split[1])
+                                self.count +=1
+
                                 # selenium's get_screenshot_as_file returns true if all is well.
-                                if self.driver.get_screenshot_as_file(self.file_path.split('.png')[0] + '_' + str(i+1) + '.png'):
-                                    print "[SUCCESS] %s saved." % os.path.basename((self.file_path.split('.png')[0] + '_' + str(i+1) + '.png'))
+                                if self.driver.get_screenshot_as_file(file_name):
+                                    print "[SUCCESS] %s saved." % os.path.basename(file_name)
                                 else:
-                                    print "[ERROR] saving %s failed." % os.path.basename((self.file_path.split('.png')[0] + '_' + str(i+1) + '.png'))
+                                    print "[ERROR] saving %s failed." % os.path.basename(file_name)
                                 i+=1
                     else:
                         # get_screenshot_as_file returns true if screenshot was
@@ -315,7 +337,7 @@ class ui_testing(object):
                 # create the filename for the new file. use description,
                 # browser, operating system. note there is no _baseline
                 file_name = str(description) + '_' + \
-                    browser + '_' + op_sys + file_extension
+                    self.browser + '_' + op_sys + file_extension
                 # add the directory where the file will be saved.
                 self.file_path = os.path.join(self.new_location, file_name)
 
@@ -330,26 +352,36 @@ class ui_testing(object):
                     # This was honestly figured out from pure trial and error.
                     val = math.floor(self.driver.execute_script(js_code))
                     i = 0
+
+                    # split the directory and file name so i can append the number to the beginning of the file name.
+                    split =  os.path.split(self.file_path)
+
+                    file_name = os.path.join(split[0], str(self.count) + '_' + split[1])
+                    self.count +=1
                     # Take the initial screenshot of the page no scrolling occurred yet.
                     # Note baseline_NUMBER_HERE is being appended.
                     # selenium's get_screenshot_as_file returns true if all is well.
-                    if self.driver.get_screenshot_as_file(self.file_path.split('.png')[0] + '_' + str(i) + '.png'): 
-                        print "[SUCCESS] %s saved." % os.path.basename((self.file_path.split('.png')[0] + '_' + str(i) + '.png'))
+                    if self.driver.get_screenshot_as_file(file_name): 
+                        print "[SUCCESS] %s saved." % os.path.basename(file_name)
                     else:
-                        print "[ERROR] saving %s failed." % os.path.basename((self.file_path.split('.png')[0] + '_' + str(i) + '.png'))
-                    # only bother scrolling if the page needs to be scrolled. note this js is compiled code
+                        print "[ERROR] saving %s failed." % os.path.basename(file_name)
+                    # only bother scrolling if the page needs to be scrolled. note this is compiled code.
                     if self.driver.execute_script('window.scrollTo(0,1);return 0!=window.pageYOffset?(window.scrollTo(0,0),!0):(window.scrollTo(0,0),!1);'):
-                        # val is the number of times we need to scroll, so need to generate this # of screenshots.
+                        # val is the number of times we need to scroll, so need to generate this # of screenshots.     
                         while i < val:
                             # scroll the page, because we already took the initial screenshot above.
                             self.driver.execute_script('window.scrollBy(0, window.innerHeight);')
                             # this sleep is needed because selenium tends to advance to the next webpage before this code can finish.
                             time.sleep(3)
+
+                            file_name = os.path.join(split[0], str(self.count) + '_' + split[1])
+                            self.count +=1
+
                             # selenium's get_screenshot_as_file returns true if all is well.
-                            if self.driver.get_screenshot_as_file(self.file_path.split('.png')[0] + '_' + str(i+1) + '.png'):
-                                print "[SUCCESS] %s saved." % os.path.basename((self.file_path.split('.png')[0] + '_' + str(i+1) + '.png'))
+                            if self.driver.get_screenshot_as_file(file_name):
+                                print "[SUCCESS] %s saved." % os.path.basename(file_name)
                             else:
-                                print "[ERROR] saving %s failed." % os.path.basename((self.file_path.split('.png')[0] + '_' + str(i+1) + '.png'))
+                                print "[ERROR] saving %s failed." % os.path.basename(file_name)
                             i+=1
                 # browser isn't chrome
                 else:
