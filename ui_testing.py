@@ -44,6 +44,9 @@ class ui_testing(object):
         # used in generating file names for chrome
         self.count = 1
 
+        # used to keep track if the program should be terminated early or not.
+        self.early_termination = False
+
         # Set up the directories, see function documentation below.
         self.setUpDirectories()
 
@@ -459,9 +462,16 @@ class ui_testing(object):
         except IOError:
             print "[ERROR] file or folder not found."
 
+    """
+    Mutator: Sets the point to terminate after. (bool)
+      If True then the program will be terminated after the previous screnshots are generated
+      If False then the program continues as normal.
+    """
+    def setEarlyTermination(self, terminate):
+        self.early_termination = terminate
 
     """
-    Called when object is destroyed (the desctructor). Notifies the user of the status and if any diffs were found.
+    Called when object is destroyed (the destructor). Notifies the user of the status and if any diffs were found.
     """
     def __del__(self):
         if not self.is_baseline:
