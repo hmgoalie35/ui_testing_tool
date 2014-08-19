@@ -9,11 +9,11 @@ Extremely basic example, see the baseline and new images to see what changed. Be
 
 The .gif generated
 
-![ui_testing_gif](https://raw.githubusercontent.com/hmgoalie35/ui_testing_tool/master/ui_testing_examples/chrome/diff/whats_up_link_chrome_windows_0_diff.gif)
+![ui_testing_gif](https://raw.githubusercontent.com/hmgoalie35/ui_testing_tool/master/ui_testing_examples/chrome/diff/1_whats_up_link_chrome_windows_diff.gif)
 
 The .png generated
 
-![ui_testing_png](https://raw.githubusercontent.com/hmgoalie35/ui_testing_tool/master/ui_testing_examples/chrome/diff/whats_up_link_chrome_windows_0_diff.png)
+![ui_testing_png](https://raw.githubusercontent.com/hmgoalie35/ui_testing_tool/master/ui_testing_examples/chrome/diff/1_whats_up_link_chrome_windows_diff.png)
 
 The beauty is that these diff images can be tweaked as you desired, just dig into ImageMagick's documentation and then change the os.system call in the ui_testing.py
 
