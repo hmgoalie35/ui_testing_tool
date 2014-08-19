@@ -167,7 +167,7 @@ class ui_testing(object):
                 #TODO enable check for any number at the end of the file (currently goes up to 7)
                 if self.browser == 'chrome':
                     split = os.path.split(self.file_path)
-                    file_exists = os.path.exists(os.path.join(split[0], str(0) + '_' + split[1])) or os.path.exists(os.path.join(split[0], str(1) + '_' + split[1])) or os.path.exists(os.path.join(split[0], str(2) + '_' + split[1])) or os.path.exists(os.path.join(split[0], str(3) + '_' + split[1])) or os.path.exists(os.path.join(split[0], str(4) + '_' + split[1])) or os.path.exists(os.path.join(split[0], str(5) + '_' + split[1])) or os.path.exists(os.path.join(split[0], str(6) + '_' + split[1])) or os.path.exists(os.path.join(split[0], str(7) + '_' + split[1]))
+                    file_exists = os.path.exists(os.path.join(split[0], str(self.count) + '_' + split[1]))
                 # for other browsers just use the normal file_path that was generated.
                 else:
                     file_exists = os.path.exists(self.file_path)
@@ -198,9 +198,9 @@ class ui_testing(object):
                             # Note specific number is being appended to the beginning of the file name.
                             # selenium's get_screenshot_as_file returns true if all is well.
                             if self.driver.get_screenshot_as_file(file_name): 
-                                print "[SUCCESS] %s saved." % os.path.basename(file_name)
+                                print "[SUCCESS] %s overwritten." % os.path.basename(file_name)
                             else:
-                                print "[ERROR] saving %s failed." % os.path.basename(file_name)
+                                print "[ERROR] overwriting %s failed." % os.path.basename(file_name)
                             # only bother scrolling if the page needs to be scrolled. note this is compiled code.
                             if self.driver.execute_script('window.scrollTo(0,1);return 0!=window.pageYOffset?(window.scrollTo(0,0),!0):(window.scrollTo(0,0),!1);'):
                                 # val is the number of times we need to scroll, so need to generate this # of screenshots.     
@@ -215,9 +215,9 @@ class ui_testing(object):
 
                                     # selenium's get_screenshot_as_file returns true if all is well.
                                     if self.driver.get_screenshot_as_file(file_name):
-                                        print "[SUCCESS] %s saved." % os.path.basename(file_name)
+                                        print "[SUCCESS] %s overwritten." % os.path.basename(file_name)
                                     else:
-                                        print "[ERROR] saving %s failed." % os.path.basename(file_name)
+                                        print "[ERROR] overwriting %s failed." % os.path.basename(file_name)
                                     i+=1
                         # browser isn't chrome
                         else:
@@ -234,9 +234,9 @@ class ui_testing(object):
                                         # crop the element, returns true if
                                         # successful. see function documentation below.
                                         if self.cropElement(element_specifier, method):
-                                            print "[SUCCESS] %s cropped." % (os.path.basename(self.file_path))
+                                            print "[SUCCESS] %s cropped & overwritten." % (os.path.basename(self.file_path))
                                         else:
-                                            print "[ERROR] cropping %s failed." % element_specifier
+                                            print "[ERROR] overwriting %s failed." % element_specifier
                                     else:
                                         # user did not pass element_specifier
                                         # and a valid method to the function.
@@ -245,7 +245,22 @@ class ui_testing(object):
                                         self.driver.quit()
                                         raise Exception(msg)
                             else:
-                                print "[ERROR] saving %s failed." % os.path.basename(self.file_path)
+                                print "[ERROR] overwriting %s failed." % os.path.basename(self.file_path)
+                    else:
+                        # this block of code is needed in case the user enters 'n' when asked to overwrite the files.
+                        # this is because the self.count will not increment itself because the baseline files are never being generated again. So if the user was to enter in n, the following baseline images
+                        # would have numbers being appened that are all screwy. This fixes that by adding the correct # to the count. 
+                        # the number we are generating is how many files have that certain description in the baseline directory. This is therefore the amount of #'s we need to 'skip' to get to 
+                        # what the real value of self.count would be if the baselines were overwritten.
+                        
+                        # get list of files in the directory
+                        files = os.listdir(self.baseline_location)
+                        # iterate through the files
+                        for i in files:
+                            # check if the file name contains the description
+                            if description in i:
+                                # if so, increment the count.
+                                self.count+=1
                 else:
                     # cropping is not supported for chrome. due to the fact that chromedriver does not take fullscreen screenshots, have to manually
                     # scroll the browser window and take screenshots after each
