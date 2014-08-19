@@ -44,7 +44,7 @@ class Test(object):
         #--------------------------------------------------------------------------------
 
 
-        # I recommended to maximize the window. not necessary though. Analysis will show weird results however if comparisons are done w/ different browser window sizes
+        # I recommend to maximize the window. not necessary though. Analysis will show weird results however if comparisons are done w/ different browser window sizes
         self.driver.maximize_window()
         self.driver.get(self.base_url)
 
@@ -58,14 +58,7 @@ class Test(object):
         ui.generateFileNameAndTakeScreenshot('github_logo', 'xpath', "/html/body/div[1]/div[1]/div/a")
         #--------------------------------------------------------------------------------
 
-        # don't forget to quit the driver before calling the compareScreenshots() function
+        # don't forget to quit the driver.
         self.driver.quit()
-
-        #--------------------------------------------------------------------------------
-        # this needs to be the last thing that is called, otherwise the diff images will never be generated.
-        # this method will only do anything when False is sent to the constructor as the 3rd parameter.
-        ui.compareScreenshots()
-        #--------------------------------------------------------------------------------
-
 if __name__ == '__main__':
     Test()
