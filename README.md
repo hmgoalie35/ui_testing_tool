@@ -1,7 +1,11 @@
 ui_testing_tool
 ===============
 
+Plug-in module when using selenium that takes snapshots of the webpage and spits back if there were any css or html changes. (need to run baselines first)
+
 Utilizes ImageMagick and Selenium to test UI elements that may have changed due to css or html changes
+
+NOTE: HEAVILY tested on chrome and firefox, barely tested on safari and ie.
 
 For info and a getting started guide, see template.py. The ui_testing.py code is also very well documented so delve into that for more info. See the demo and ui_test_examples folders to see what the program does.
 
@@ -51,11 +55,12 @@ In your selenium code, create a ui_testing object, passing in the driver, browse
 ```
 from selenium import webdriver
 self.driver = webdriver.Firefox()
-ui = ui_testing(self.driver, 'firefox', True)# change True to False to run in non-baseline mode and generate diff images (if any)
+# change True to False to run in non-baseline mode and generate diff images (if any)
+ui = ui_testing(self.driver, 'firefox', True)
 ```
 You can now use all of the functions in the ui_testing module.
 
-This will take a screenshot and label the output file with the description 'test_1' file name will be test_1_firefox_linux_baseline.png. this varies depending on OS and browser being used.
+Below will take a screenshot and label the output file with the description 'test_1' file name will be test_1_firefox_linux_baseline.png. this varies depending on OS and browser being used.
 
 ```
 ui.generateFileNameAndTakeScreenshot('test_1')
@@ -87,5 +92,8 @@ Terminal output looks like this.
 ```
 
 Remember to first generate your baseline images.
+
+The file names generated for chrome have consecutive numbers preprended to the filename. Also, note that for chrome,
+multiple screenshots need to be taken of one webpage in order to ensure that everything on the page is being analyzed.
 
 Shoot me an email if you have any questions, hpittin1@binghamton.edu
