@@ -162,9 +162,7 @@ class ui_testing(object):
                     '_' + op_sys + '_baseline' + file_extension
                 # Add the directory where this file should be saved.
                 self.file_path = os.path.join(self.baseline_location, file_name)
-                # if the browser is chrome then the screenshots that are generated all have _baseline_NUMBER_HERE.png. So need to check if those already exist.
-                # it is likely that if _baseline_0.png exists then the others do also but the chained or's are for safety.
-                #TODO enable check for any number at the end of the file (currently goes up to 7)
+                # if the browser is chrome then the screenshots that are generated all have NUMBER_ prepended to the file name. So need to check if those already exist.
                 if self.browser == 'chrome':
                     split = os.path.split(self.file_path)
                     file_exists = os.path.exists(os.path.join(split[0], str(self.count) + '_' + split[1]))
@@ -195,7 +193,7 @@ class ui_testing(object):
                             file_name = os.path.join(split[0], str(self.count) + '_' + split[1])
                             self.count +=1
                             # Take the initial screenshot of the page no scrolling occurred yet.
-                            # Note specific number is being appended to the beginning of the file name.
+                            # Note a specific number is being prepended to the beginning of the file name.
                             # selenium's get_screenshot_as_file returns true if all is well.
                             if self.driver.get_screenshot_as_file(file_name): 
                                 print "[SUCCESS] %s overwritten." % os.path.basename(file_name)
@@ -280,7 +278,7 @@ class ui_testing(object):
                         self.count +=1
 
                         # Take the initial screenshot of the page no scrolling occurred yet.
-                        # Note baseline_NUMBER_HERE is being appended.
+                        # Note NUMBER_ is being prepended.
                         # selenium's get_screenshot_as_file returns true if all is well.
                         if self.driver.get_screenshot_as_file(file_name): 
                             print "[SUCCESS] %s saved." % os.path.basename(file_name)
@@ -358,7 +356,7 @@ class ui_testing(object):
                     file_name = os.path.join(split[0], str(self.count) + '_' + split[1])
                     self.count +=1
                     # Take the initial screenshot of the page no scrolling occurred yet.
-                    # Note baseline_NUMBER_HERE is being appended.
+                    # Note NUMBER_ being prepended.
                     # selenium's get_screenshot_as_file returns true if all is well.
                     if self.driver.get_screenshot_as_file(file_name): 
                         print "[SUCCESS] %s saved." % os.path.basename(file_name)
