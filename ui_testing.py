@@ -47,89 +47,73 @@ class ui_testing(object):
         # Set up the directories, see function documentation below.
         self.setUpDirectories()
     """
-        Params: None
+        Params: path_to_new_file: the path to the new file that was just generated that is to be compared with the baseline.
+            Note: the filename of the new file and the filename of the baseline file are the same, they just differ by _baseline. So 
+            adding this, we can generate what the baseline file name should be. (before we actually compare we make sure that this generated
+            file name actually exists.)
 
-        This only does anything if this is not the baseline run.
         Compares the files only if they match. What i mean by match is that they have the same generated file name, minus the _baseline. 
         Calls imagemagick on the command line and saves the result in the difference file, which is a .gif and .png
     """
 
-    def compareScreenshots(self):
-        # only do this if not baseline
-        if not self.is_baseline:
-            # sort the list so files in each directory match up with one
-            # another.
-            baselines = sorted(os.listdir(self.baseline_location))
-            newfiles = sorted(os.listdir(self.new_location))
-            # Check to make sure both directories have the same number of
-            # files, if not then there is no point to compare because there
-            # would be an error at some point when comparing the files.
-            if len(baselines) == len(newfiles):
-                try:
-                    print "Generating diff images (if any)..."
-                    # iterate through all files
-                    for i in range(len(baselines)):
-                        # check to make sure the file names match, otherwise we would be comparing different pictures and this would show some drastic differences.
-                        # see generateFileNameAndTakeScreenshot to see how
-                        # filenames are being generated and why the check below
-                        # works.
-                        split = baselines[i].split('_baseline')
-                        if (split[0] + split[1] == newfiles[i]):
-                            # generate the difference file that will be saved
-                            # in the diff location. The file name is the same, all we have to do is add in _diff. Which is what is being done below.
-                            difference_file = os.path.abspath(
-                                os.path.join(self.diff_location, newfiles[i].replace('.png', '_diff.png')))
-                            # for the .gif version, everything else is the same
-                            # just change the extension.
-                            difference_file_gif = difference_file.replace(
-                                '.png', '.gif')
+    def compareScreenshots(self, path_to_new_file):
+        # get the file name, splitting off the path to the file.
+        new_file_name = os.path.basename(path_to_new_file)
+        # the baseline file is of the same form of the new file but it contains _baseline, so append this on.
+        baseline_file_name = new_file_name.replace('.png', '_baseline.png')
+        # add in the path to the baseline file, and now we have the full path to the baseline file.
+        # note that we still do not know if this file exists, which is what the next if statement does.
+        path_to_baseline_file = os.path.join(self.baseline_location, baseline_file_name)
+        try:
+            # make sure both the new file and baseline file exist.
+            if os.path.exists(path_to_new_file) and os.path.exists(path_to_baseline_file):
+                # generate the difference file name that will be saved
+                # in the diff location. The file name is the same, all we have to do is add in _diff. Which is what is being done below.
+                difference_file = os.path.abspath(
+                    os.path.join(self.diff_location, new_file_name.replace('.png', '_diff.png')))
+                # for the .gif version, everything else is the same
+                # just change the extension.
+                difference_file_gif = difference_file.replace(
+                    '.png', '.gif')
 
-                            # os.listdir only lists the filenames, so add back
-                            # on the full path to the file.
+                # compare the histograms of the 2 images, and if they are different then generate the diff image, otherwise no need to generate a diff image if the images havn't changed
+                i1 = Image.open(path_to_baseline_file)
+                i2 = Image.open(path_to_new_file)
+                if i1.histogram() != i2.histogram():
+                    print "\nDifferences found, generating diff images..."
+                    # keep track of the images reported as being changed.
+                    self.difference_list.append(os.path.basename(new_file_name))
 
-                            # TODO refactor this logic.
-                            baselines[i] = os.path.abspath(
-                                os.path.join(self.baseline_location, baselines[i]))
-                            newfiles[i] = os.path.abspath(
-                                os.path.join(self.new_location, newfiles[i]))
+                   # the os.system calls below can be tweaked as desired, further digging into imagemagick's documentation may come up with a better way for comparison
+                    os.system(
+                        "composite %s %s -compose difference %s" %
+                        (path_to_baseline_file, path_to_new_file, difference_file))
+                    print "[SUCCESS] %s saved." % os.path.basename((difference_file))
 
-                            # compare the histograms of the 2 images, and if they are different then generate the diff image, otherwise no need to generate a diff image if the images havn't changed
-                            i1 = Image.open(baselines[i])
-                            i2 = Image.open(newfiles[i])
-                            if i1.histogram() != i2.histogram():
-                                # keep track of the images reported as being changed.
-                                self.difference_list.append(os.path.basename(newfiles[i]))
+                    # generate the .gif (pulled right from imagemagick's documentation)
+                    os.system("convert -delay 100 %s %s -loop 0 %s" %
+                              (path_to_baseline_file, path_to_new_file, difference_file_gif))
+                    print "[SUCCESS] %s saved." % os.path.basename(difference_file_gif)
 
-                               # the os.system calls below can be tweaked as desired, further digging into imagemagick's documentation may come up with a better way for comparison
-                                os.system(
-                                    "composite %s %s -compose difference %s" %
-                                    (baselines[i], newfiles[i], difference_file))
-                                print "[SUCCESS] %s saved." % os.path.basename((difference_file))
-
-                                # generate the .gif (pulled right from imagemagick's documentation)
-                                os.system("convert -delay 100 %s %s -loop 0 %s" %
-                                          (baselines[i], newfiles[i], difference_file_gif))
-                                print "[SUCCESS] %s saved." % os.path.basename(difference_file_gif)
-
-                                # this imagemagick call can be commented in to have a different type of diff image generated (highlights differences in a blue.)
-                                # remember to change the name of the file it will be saved as if desired. --> difference_file.replace('_diff.png', '_alternatediff.png') --> difference_file.replace('_diff.png', 'THE_FILE_NAME_YOU_WANT.png')
-                                # os.system("compare -dissimilarity-threshold 1 -fuzz 20% -metric AE -highlight-color blue " + baselines[i] + " " + newfiles[i] + " " + difference_file.replace('_diff.png', '_alternatediff.png'))
-                        else:
-                            # ex: google_landing_page and google_search_results
-                            # do not match.
-                            print "[ERROR] files do not match, trying to compare %s and %s." % (baselines[i], newfiles[i])
-
-                    # if anything was added to the difference list, then we know there were difference files generated, notify the user which files changed.
-                    if len(self.difference_list) > 0:
-                        print "[INFO] differences found, the file(s) with differences are: \n" + '\n'.join(self.difference_list)
-                    else:
-                        print "[INFO] no differences found!"
-                # Could not find one of the baseline, new or diff folders. Did you delete them in the middle of running the program?
-                except IOError:
-                    print "[ERROR] file or folder not found."
-            # Different # of files in the baseline and new directories. Error because every baseline file should have a corresponding new file.
+                    # this imagemagick call can be commented in to have a different type of diff image generated (highlights differences in a blue.)
+                    # remember to change the name of the file it will be saved as if desired. --> difference_file.replace('_diff.png', '_alternatediff.png') --> difference_file.replace('_diff.png', 'THE_FILE_NAME_YOU_WANT.png')
+                    
+                    # os.system("compare -dissimilarity-threshold 1 -fuzz 20% -metric AE -highlight-color blue " + baselines[i] + " " + newfiles[i] + " " + difference_file.replace('_diff.png', '_alternatediff.png'))
+                
+                else:
+                    print "No differences found."
             else:
-                print '[ERROR] differing number of files in %s & %s directories.' % (self.baseline_location, self.new_location)
+                # if the new file caused the above if statement to fail, notify the user with the specifics
+                if not os.path.exists(path_to_new_file):
+                    print "[ERROR] new file %s does not exist, can't compare." % new_file_name
+                # if the baseline file caused the above if statement to fail, notify the user with the specifics
+                elif not os.path.exists(path_to_baseline_file):
+                    print "[ERROR] trying to compare with the baseline file %s, but it does not exist." % os.path.basename(path_to_baseline_file)
+
+        # Could not find one of the baseline, new or diff folders. Did you delete them in the middle of running the program?
+        except IOError:
+            print "[ERROR] file or folder not found."
+    
 
         """
         Params:
@@ -170,7 +154,7 @@ class ui_testing(object):
         if description:
             # Generate the baselines if this is a baseline run.
             if self.is_baseline:
-                print "Generating baseline image..."
+                print "\nGenerating baseline image..."
                 # Generate the file name. This is created by concatenating the
                 # description, browser and operating system. _baseline is also
                 # appended for clarification.
@@ -333,7 +317,7 @@ class ui_testing(object):
             else:
                 # if it is not the baseline run then we want to create the new
                 # images that will be used to create the diff images.
-                print "Generating new image..."
+                print "\nGenerating new image..."
                 # create the filename for the new file. use description,
                 # browser, operating system. note there is no _baseline
                 file_name = str(description) + '_' + \
@@ -363,12 +347,15 @@ class ui_testing(object):
                     # selenium's get_screenshot_as_file returns true if all is well.
                     if self.driver.get_screenshot_as_file(file_name): 
                         print "[SUCCESS] %s saved." % os.path.basename(file_name)
+                        #compare the newly generated screenshot with the baseline (if the baseline exists) see function documentation for more info.
+                        self.compareScreenshots(file_name)
                     else:
                         print "[ERROR] saving %s failed." % os.path.basename(file_name)
                     # only bother scrolling if the page needs to be scrolled. note this is compiled code.
                     if self.driver.execute_script('window.scrollTo(0,1);return 0!=window.pageYOffset?(window.scrollTo(0,0),!0):(window.scrollTo(0,0),!1);'):
                         # val is the number of times we need to scroll, so need to generate this # of screenshots.     
                         while i < val:
+                            print "\nGenerating new image..."
                             # scroll the page, because we already took the initial screenshot above.
                             self.driver.execute_script('window.scrollBy(0, window.innerHeight);')
                             # this sleep is needed because selenium tends to advance to the next webpage before this code can finish.
@@ -380,6 +367,8 @@ class ui_testing(object):
                             # selenium's get_screenshot_as_file returns true if all is well.
                             if self.driver.get_screenshot_as_file(file_name):
                                 print "[SUCCESS] %s saved." % os.path.basename(file_name)
+                                #compare the newly generated screenshot with the baseline (if the baseline exists) see function documentation for more info.
+                                self.compareScreenshots(file_name)
                             else:
                                 print "[ERROR] saving %s failed." % os.path.basename(file_name)
                             i+=1
@@ -405,6 +394,8 @@ class ui_testing(object):
                                     VALID_METHODS)
                                 self.driver.quit()
                                 raise Exception(msg)
+                        #compare the newly generated screenshot with the baseline (if the baseline exists) see function documentation for more info.
+                        self.compareScreenshots(self.file_path)
                     else:
                         print "[ERROR] saving %s failed." % os.path.basename(self.file_path)
 
@@ -521,6 +512,17 @@ class ui_testing(object):
             os.mkdir(self.new_location)
         if not os.path.exists(self.diff_location):
             os.mkdir(self.diff_location)
+
+    """
+    Called when object is destroyed (the desctructor). Notifies the user of the status and if any diffs were found.
+    """
+    def __del__(self):
+        if not self.is_baseline:
+            # if anything was added to the difference list, then we know there were difference files generated, notify the user which files changed.
+            if len(self.difference_list) > 0:
+                print "\n[INFO] the file(s) with differences are: \n" + '\n'.join(self.difference_list)
+            else:
+                print "\n[INFO] no differences found!"
     # to string.
     def __str__(self):
         return "Baseline: %s \nBrowser: %s" % (self.is_baseline, self.browser)
