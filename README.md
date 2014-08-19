@@ -74,12 +74,8 @@ the below line will take a screenshot and then crop the image to just this ancho
 ui.generateFileNameAndTakeScreenshot('test_2', 'id', 'back_btn')
 
 ```
-When you are all done taking screenshots and there is no more selenium code to crunch, put in
-```
-self.driver.quit()
-ui.compareScreenshots()
-```
-It is good practice to quit the driver before comparing the screenshots.
+
+After you have run the baseline mode, running in non baseline mode will automatically generate diff files if there were any differences found b/w the baseline and new files. (no need to call the compareScreenshots() method, which was previously needed)
 
 Running the script:
 Just run your selenium code as you would.
