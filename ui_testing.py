@@ -6,6 +6,7 @@ import os
 import inspect
 import time
 import math
+import sys
 
 # Valid methods selenium can use to search for an element on a page. See
 # selenium python API for more info if desired.
@@ -289,7 +290,11 @@ class ui_testing(object):
                 else:
                     print "[ERROR] %s not %s." % (os.path.basename(file_name), mode)
                 i+=1
-
+        # if the user specified they want to terminate the program, then do so. Note the __del__ method is called
+        if self.early_termination:
+            print "\nTerminating the ui_testing module after having generated %s" % os.path.basename(file_name)
+            self.driver.quit()
+            sys.exit(0)
 
     """
     Params: mode - the mode this function is being used for (overwriting or saving) [REQUIRED]
@@ -330,6 +335,12 @@ class ui_testing(object):
             if not self.is_baseline:
                 # compare the newly generated screenshot w/ the baseline (if the baseline exists) see function documentation.
                 self.compareScreenshots(self.file_path)
+
+        # if the user specified they want to terminate the program, then do so. Note the __del__ method is called
+            if self.early_termination:
+                print "\nTerminating the ui_testing module after having generated %s" % os.path.basename(self.file_path)
+                self.driver.quit()
+                sys.exit(0)
         else:
             print "[ERROR] %s not %s." % (os.path.basename(self.file_path), mode)
 
@@ -464,11 +475,21 @@ class ui_testing(object):
 
     """
     Mutator: Sets the point to terminate after. (bool)
+      Use: If you want to only take screenshots of one webpage. Useful if you are using a selenium script that navigates through a bunch of webpages.
+
+      NOTE: You need to call this method with the desired value BEFORE you call generateFileNameAndTakeScreenshot()
+
       If True then the program will be terminated after the previous screnshots are generated
-      If False then the program continues as normal.
+      If False then the program continues as normal after warning the user.
+
     """
     def setEarlyTermination(self, terminate):
-        self.early_termination = terminate
+        # check to make sure user entered in a boolean
+        if isinstance(terminate, bool):
+            self.early_termination = terminate
+        else:
+            print "Invalid option, please send either True or False to the function."
+
 
     """
     Called when object is destroyed (the destructor). Notifies the user of the status and if any diffs were found.
