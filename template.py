@@ -40,13 +40,21 @@ class Test(object):
         # remember to create an instance of the object, sending the driver, browser and if it is the baseline run to the constructor.
         # if you were to use chrome, multiple screenshots have to be taken of the same page because chromedriver can't
         # take full page screenshots.
-        ui = ui_testing(self.driver, 'chrome', True) # change True to False to run in non baseline mode which will then generate the diff images. I don't have access to github's source code so i can't show a demo.
+        ui = ui_testing(self.driver, 'firefox', True) # change True to False to run in non baseline mode which will then generate the diff images. I don't have access to github's source code so i can't show a demo.
         #--------------------------------------------------------------------------------
 
 
         # I recommend to maximize the window. not necessary though. Analysis will show weird results however if comparisons are done w/ different browser window sizes
         self.driver.maximize_window()
         self.driver.get(self.base_url)
+
+        #--------------------------------------------------------------------------------
+        # If the line below is uncommented, this selenium script will be terminated after the screenshots for github_landing are generated.
+        # Note: you need to put the line below BEFORE the line you want to exit after.
+
+        #ui.setEarlyTermination(True)
+        
+        #--------------------------------------------------------------------------------
 
         #--------------------------------------------------------------------------------
         # This will take a screenshot of the whole page, note that method or element_specifier are not being passed
