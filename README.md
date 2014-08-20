@@ -96,4 +96,19 @@ Remember to first generate your baseline images.
 The file names generated for chrome have consecutive numbers preprended to the filename. Also, note that for chrome,
 multiple screenshots need to be taken of one webpage in order to ensure that everything on the page is being analyzed.
 
+NEW Feature:
+
+You can now specify a certain point to terminate taking screenshots. This is useful if you want to take screenshots of just one html file when using a selenium script that is being used to test a bunch of html files. See below
+
+```
+ui.setEarlyTermination(True)
+ui.generateFileNameAndTakeScreenshot('test_3')
+# more selenium code
+# more ui.generateFileNameAndTakeScreenshot calls
+```
+The above lines will generate the filename(s) (and diffs if not in baseline mode) for the webpage the selenium code
+is currently on and then exit.
+
+NOTE: You need to do call setEarlyTermination BEFORE you call the generateFileNameAndTakeScreenshot function
+
 Shoot me an email if you have any questions, hpittin1@binghamton.edu
