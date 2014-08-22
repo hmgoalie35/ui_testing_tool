@@ -33,7 +33,12 @@ class ui_testing(object):
         # if baseline or not.
         self.is_baseline = is_baseline
 
-        # the browser and selenium driver have to both be the same or the program throws an error. ex: can't use Firefox() driver while passing in firefox to the constructor.
+        # used to keep track of the corresponding directories. (these are set in the setUpDirectories function)
+        self.baseline_location = None
+        self.new_location = None
+        self.diff_location = None
+
+        # the browser and selenium driver have to both be the same or the program throws an error. ex: can't use Firefox() driver while passing in chrome to the constructor.
 
         # The browser the test is being run on. 
         self.browser = browser.lower()
@@ -59,23 +64,23 @@ class ui_testing(object):
         # TODO fix logic behind where the ui_testing folder is created.
         caller_location = os.path.abspath(inspect.stack()[2][1])
         # The current directory is where the caller script is located
-        self.current_directory = os.path.abspath(
+        current_directory = os.path.abspath(
             os.path.dirname(caller_location))
         # Create a ui_testing folder in the current directory
-        self.ui_testing_folder = os.path.abspath(
-            os.path.join(self.current_directory, 'ui_testing/'))
+        ui_testing_folder = os.path.abspath(
+            os.path.join(current_directory, 'ui_testing/'))
         # Create a folder that uses the name of the browser
-        self.browser_folder = os.path.abspath(
-            os.path.join(self.ui_testing_folder, self.browser))
+        browser_folder = os.path.abspath(
+            os.path.join(ui_testing_folder, self.browser))
         # Create a folder in the browser folder called baseline, and do this for new and diff folders also.
         # The new folder is where the new images are saved, the diff folder is
         # where the imagemagick results are saved
         self.baseline_location = os.path.abspath(
-            os.path.join(self.browser_folder, 'baseline/'))
+            os.path.join(browser_folder, 'baseline/'))
         self.new_location = os.path.abspath(
-            os.path.join(self.browser_folder, 'new/'))
+            os.path.join(browser_folder, 'new/'))
         self.diff_location = os.path.abspath(
-            os.path.join(self.browser_folder, 'diff/'))
+            os.path.join(browser_folder, 'diff/'))
 
         # Make sure the browser driver and the browser specified in the constructor match.
         driverName = self.driver.name
@@ -89,10 +94,10 @@ class ui_testing(object):
                 (self.driver.name, self.browser))
 
         # Create the directories if they do not already exist.
-        if not os.path.exists(self.ui_testing_folder):
-            os.mkdir(self.ui_testing_folder)
-        if not os.path.exists(self.browser_folder):
-            os.mkdir(self.browser_folder)
+        if not os.path.exists(ui_testing_folder):
+            os.mkdir(ui_testing_folder)
+        if not os.path.exists(browser_folder):
+            os.mkdir(browser_folder)
         if not os.path.exists(self.baseline_location):
             os.mkdir(self.baseline_location)
         if not os.path.exists(self.new_location):
@@ -454,11 +459,12 @@ class ui_testing(object):
                               (path_to_baseline_file, path_to_new_file, difference_file_gif))
                     print "[SUCCESS] %s saved.\n" % os.path.basename(difference_file_gif)
 
-                    # this imagemagick call can be commented in to have a different type of diff image generated (highlights differences in a blue.)
+                    # this imagemagick call can be commented in to have a different type of diff image generated (highlights differences in blue.)
                     # remember to change the name of the file it will be saved as if desired. --> difference_file.replace('_diff.png', '_alternatediff.png') --> difference_file.replace('_diff.png', 'THE_FILE_NAME_YOU_WANT.png')
                     
-                    # os.system("compare -dissimilarity-threshold 1 -fuzz 20% -metric AE -highlight-color blue " + baselines[i] + " " + newfiles[i] + " " + difference_file.replace('_diff.png', '_alternatediff.png'))
-                
+                    # os.system("compare -dissimilarity-threshold 1 -fuzz 20% -metric AE -highlight-color blue " + path_to_baseline_file + " " + path_to_new_file + " " + difference_file.replace('_diff.png', '_alternatediff.png'))
+                    # print "[SUCCESS] %s saved.\n" % os.path.basename(difference_file.replace('_diff.png', '_alternatediff.png'))
+                    
                 else:
                     print "No differences found."
             else:
