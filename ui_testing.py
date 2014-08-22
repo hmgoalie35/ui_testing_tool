@@ -292,7 +292,7 @@ class ui_testing(object):
                 i+=1
         # if the user specified they want to terminate the program, then do so. Note the __del__ method is called
         if self.early_termination:
-            print "\nTerminating the ui_testing module after having generated %s" % os.path.basename(file_name)
+            print "\nTerminating the ui_testing module after having generated %s\n\n\n" % os.path.basename(file_name)
             self.driver.quit()
             sys.exit(0)
 
@@ -336,9 +336,9 @@ class ui_testing(object):
                 # compare the newly generated screenshot w/ the baseline (if the baseline exists) see function documentation.
                 self.compareScreenshots(self.file_path)
 
-        # if the user specified they want to terminate the program, then do so. Note the __del__ method is called
+            # if the user specified they want to terminate the program, then do so. Note the __del__ method is called
             if self.early_termination:
-                print "\nTerminating the ui_testing module after having generated %s" % os.path.basename(self.file_path)
+                print "\nTerminating the ui_testing module after having generated %s\n\n\n" % os.path.basename(self.file_path)
                 self.driver.quit()
                 sys.exit(0)
         else:
